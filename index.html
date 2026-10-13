@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#17696a">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Accords">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Diagrammes d'accords pour débutants</title>
+<style>
+:root{--bg:#f2f5f6;--panel:#fff;--ink:#16222b;--muted:#5d6b75;--line:#cfd8dd;--accent:#17696a;--accent-ink:#fff;--warn:#fff3d6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10171c;--panel:#18222a;--ink:#e6edf1;--muted:#93a4af;--line:#2d3b45;--accent:#4fb8b2;--accent-ink:#082523;--warn:#3a3118}}
+:root[data-theme="dark"]{--bg:#10171c;--panel:#18222a;--ink:#e6edf1;--muted:#93a4af;--line:#2d3b45;--accent:#4fb8b2;--accent-ink:#082523;--warn:#3a3118}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+main{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+h1{font:700 1.6rem/1.2 Georgia,"Times New Roman",serif;margin:0 0 4px}
+p.lead{color:var(--muted);margin:0 0 18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+textarea{width:100%;min-height:76px;font:600 1.1rem/1.4 ui-monospace,Consolas,monospace;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;align-items:end}
+label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);gap:4px}
+select,button{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+button{cursor:pointer;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+#sugg{margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--warn);display:none;gap:12px;align-items:center;flex-wrap:wrap}
+#grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.card{width:128px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 6px 6px;text-align:center;cursor:pointer;color:var(--ink)}
+.card b{font-size:1.15rem;display:block}
+.card small{color:var(--muted);display:block;min-height:1.2em}
+.card svg{width:100%;height:auto;display:block}
+.hint{color:var(--muted);font-size:.85rem;margin-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-width:56px;padding:10px 14px;font-weight:700;background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+.chip.add{border-style:dashed;color:var(--accent);background:transparent}
+#sheet{position:fixed;inset:0;display:none;z-index:10}
+#sheet.open{display:block}
+.back{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px 16px 0 0;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px))}
+.sh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sh strong{flex:1}
+.cols{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:12px}
+.col h3{font-size:.8rem;color:var(--muted);margin:0 0 6px;font-weight:600}
+.opts{display:grid;gap:6px;max-height:46vh;overflow-y:auto;align-content:start}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{padding:9px 2px;background:var(--bg);color:var(--ink);border:1px solid var(--line);font-weight:600}
+.opt.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt.full{grid-column:1/-1}
+.sec{background:transparent;color:var(--ink);border-color:var(--line)}
+#psheet{position:fixed;inset:0;display:none;z-index:10}
+#psheet.open{display:block}
+.p2{grid-template-columns:1fr 1.7fr}
+.pre{text-align:left;padding:10px 12px}
+.pre small{display:block;font-weight:400;opacity:.8;margin-top:2px}
+</style>
+</head>
+<body>
+<main>
+<h1>Diagrammes d'accords</h1>
+<p class="lead">Compose ta grille avec les boutons d'accords : la page choisit pour chacun le doigté le plus facile à enchaîner pour un débutant.</p>
+<div class="panel">
+<div style="margin-bottom:10px"><button class="sec" id="presets">Grilles types (blues, pop…)</button></div>
+<div id="slots" class="chips" aria-label="Grille d'accords"></div>
+<div class="row">
+<label>Niveau<select id="lvl"><option value="full">Complet (7, maj7, m7)</option><option value="easy">Simplifié (accords de base)</option></select></label>
+<label>Capo<select id="capo"></select></label>
+
+</div>
+<div id="sugg"><span id="suggT"></span><button id="suggB">Appliquer</button></div>
+</div>
+<div id="grid" aria-live="polite"></div>
+<p class="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Clique sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de ton choix. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
+</main>
+<div id="psheet"><div class="back" id="pback"></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pT">
+<div class="sh"><strong id="pT">Grilles types</strong><button id="pok">Fermer</button></div>
+<div class="cols p2" id="pcols"></div></div></div>
+<div id="sheet"><div class="back" id="back"></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetT">
+<div class="sh"><strong id="sheetT"></strong><button class="sec" id="del">Supprimer</button><button id="ok">OK</button></div>
+<div class="cols" id="cols"></div></div></div>
+<script>
+const DB={"C":[[[-1,3,2,0,1,0],"032010",0],[[3,3,5,5,5,3],"112341",[3,6,1]],[[-1,-1,5,5,5,8],"001114",[5,4,2]],[[8,10,10,9,8,8],"134211",[8,6,1]]],"Cm":[[[-1,3,1,0,1,3],"032014",0],[[3,3,5,5,4,3],"113421",[3,6,1]],[[8,6,5,5,-1,-1],"421100",[5,4,3]],[[8,10,10,8,8,8],"134111",[8,6,1]]],"Csus2":[[[-1,3,0,0,1,3],"030014",0],[[-1,3,0,0,3,3],"010023",0],[[3,3,5,5,3,3],"113411",[3,6,1]],[[8,-1,0,7,8,8],"200134",0]],"Csus4":[[[-1,3,3,0,1,1],"034011",[1,2,1]],[[3,3,5,5,6,3],"112341",[3,6,1]],[[8,8,-1,0,6,8],"230014",0],[[8,10,10,10,8,8],"123411",[8,6,1]]],"C7":[[[-1,3,2,3,1,0],"032410",0],[[3,3,5,3,5,3],"113141",[3,6,1]],[[-1,-1,5,5,5,6],"001112",[5,4,2]],[[8,10,8,9,8,8],"131211",[8,6,1]]],"Cmaj7":[[[3,3,2,0,0,0],"231000",0],[[3,3,5,4,5,3],"113241",[3,6,1]],[[-1,-1,5,5,5,7],"001114",[5,4,2]],[[-1,-1,10,12,12,12],"001333",[12,3,1]]],"Cm7":[[[-1,3,1,3,4,-1],"021340",0],[[3,3,5,3,4,3],"113121",[3,6,1]],[[-1,-1,5,5,4,6],"002314",0],[[8,10,8,8,8,8],"131111",[8,6,1]]],"C/E":[[[0,3,2,0,1,0],"032010",0],[[0,3,2,0,1,3],"032014",0],[[-1,7,5,5,8,8],"031144",[5,4,3]]],"C/F":[[[-1,-1,3,0,1,0],"003010",0],[[1,3,2,0,1,0],"143020",0],[[-1,-1,3,5,5,3],"001342",0]],"C/G":[[[3,3,2,0,1,0],"342010",0],[[3,3,5,5,5,3],"112341",[3,6,1]],[[3,3,2,5,5,-1],"231440",[5,3,2]]],"C#":[[[-1,4,3,1,2,1],"043121",[1,3,1]],[[4,4,6,6,6,4],"112341",[4,6,1]],[[9,8,6,6,6,9],"321114",[6,4,2]],[[9,11,11,10,9,9],"134211",[9,6,1]]],"C#m":[[[-1,4,2,1,2,-1],"042130",0],[[4,4,6,6,5,4],"113421",[4,6,1]],[[9,7,6,6,-1,9],"321104",[6,4,3]],[[9,11,11,9,9,9],"134111",[9,6,1]]],"C#sus2":[[[4,4,6,6,4,4],"113411",[4,6,1]],[[9,6,6,8,9,-1],"010023",[6,5,4]],[[9,11,11,-1,9,11],"123014",[9,6,2]],[[11,11,11,13,14,11],"111341",[11,6,1]]],"C#sus4":[[[-1,4,4,1,2,-1],"034120",0],[[4,4,6,6,7,4],"112341",[4,6,1]],[[9,-1,6,6,7,9],"230014",0],[[9,11,11,11,9,9],"123411",[9,6,1]]],"C#7":[[[-1,4,3,4,2,-1],"032410",0],[[-1,4,6,4,6,4],"013141",[4,5,1]],[[9,8,6,6,6,7],"431112",[6,4,2]],[[9,11,9,10,9,9],"131211",[9,6,1]]],"C#maj7":[[[-1,4,3,1,1,1],"043111",[1,3,1]],[[4,4,6,5,6,4],"113241",[4,6,1]],[[-1,-1,-1,6,6,8],"000113",[6,3,2]],[[9,-1,10,10,9,-1],"103420",0]],"C#m7":[[[-1,4,6,4,5,4],"013121",[4,5,1]],[[-1,-1,6,6,5,7],"002314",0],[[9,11,9,9,9,9],"141111",[9,6,1]],[[-1,-1,11,13,12,12],"001423",0]],"D":[[[-1,-1,0,2,3,2],"000132",0],[[2,5,4,2,3,2],"143121",[2,6,1]],[[5,5,7,7,7,5],"112341",[5,6,1]],[[10,12,12,11,10,10],"134211",[10,6,1]]],"Dm":[[[-1,-1,0,2,3,1],"000231",0],[[5,5,7,7,6,5],"113421",[5,6,1]],[[-1,8,7,7,6,-1],"042310",0],[[10,12,12,10,10,10],"134111",[10,6,1]]],"Dsus2":[[[-1,-1,0,2,3,0],"000230",0],[[-1,-1,2,2,3,5],"001124",[2,4,3]],[[5,5,7,7,5,5],"113411",[5,6,1]],[[-1,7,7,7,10,10],"011144",[7,5,3]]],"Dsus4":[[[-1,-1,0,2,3,3],"000123",0],[[-1,5,0,0,3,5],"030014",0],[[5,5,7,7,8,5],"112341",[5,6,1]],[[10,12,12,12,10,10],"123411",[10,6,1]]],"D7":[[[-1,-1,0,2,1,2],"000213",0],[[-1,5,4,5,3,-1],"032410",0],[[5,5,7,5,7,5],"113141",[5,6,1]],[[10,12,10,11,10,10],"131211",[10,6,1]]],"Dmaj7":[[[-1,-1,0,2,2,2],"000111",[2,3,1]],[[-1,5,4,2,2,2],"043111",[2,3,1]],[[5,5,7,6,7,5],"113241",[5,6,1]],[[-1,-1,7,7,7,9],"001114",[7,4,2]]],"Dm7":[[[-1,-1,0,2,1,1],"000312",0],[[5,5,7,5,6,5],"113121",[5,6,1]],[[-1,-1,7,7,6,8],"002314",0],[[10,12,10,10,10,10],"131111",[10,6,1]]],"D/F#":[[[2,0,0,2,3,2],"100243",0],[[2,5,4,2,3,2],"143121",[2,6,1]],[[-1,-1,4,2,3,5],"003124",0]],"D/A":[[[-1,0,0,2,3,2],"000132",0],[[5,5,7,7,7,5],"112341",[5,6,1]],[[5,5,4,7,7,-1],"231440",[7,3,2]]],"D/Bb":[[[-1,1,0,2,3,2],"010243",0],[[-1,1,4,2,3,2],"014232",[2,3,1]],[[6,5,7,7,7,-1],"213330",[7,4,2]]],"D/B":[[[-1,2,0,2,3,2],"010243",0],[[-1,2,4,2,3,2],"013121",[2,5,1]],[[-1,2,4,2,3,5],"013124",[2,5,3]]],"D/C":[[[-1,3,0,2,3,2],"030142",0],[[-1,3,4,2,3,2],"024131",[2,3,1]],[[8,5,7,7,7,-1],"413330",[7,4,2]]],"Eb":[[[-1,-1,1,3,4,3],"001243",0],[[-1,6,5,3,4,3],"043121",[3,3,1]],[[-1,6,8,8,8,6],"012341",[6,5,1]],[[-1,-1,8,8,8,11],"001114",[8,4,2]]],"Ebm":[[[-1,-1,1,3,4,2],"001342",0],[[-1,-1,4,3,4,2],"003241",0],[[6,6,8,8,7,6],"113421",[6,6,1]],[[11,13,13,11,11,11],"134111",[11,6,1]]],"Ebsus2":[[[1,1,1,3,4,1],"111341",[1,6,1]],[[6,6,8,8,6,6],"113411",[6,6,1]],[[11,8,8,10,11,-1],"311240",[8,5,4]],[[11,13,13,-1,11,13],"123014",[11,6,2]]],"Ebsus4":[[[-1,-1,1,3,4,4],"001234",0],[[6,6,8,8,9,6],"112341",[6,6,1]],[[-1,-1,8,8,9,-1],"001120",[8,4,3]],[[11,13,13,13,11,11],"123411",[11,6,1]]],"Eb7":[[[-1,-1,1,3,2,3],"001324",0],[[-1,6,8,6,8,6],"013141",[6,5,1]],[[-1,-1,8,8,8,9],"001112",[8,4,2]],[[11,13,11,12,11,11],"131211",[11,6,1]]],"Ebmaj7":[[[-1,1,1,3,3,3],"011333",[1,5,4]],[[-1,6,5,3,3,3],"043111",[3,3,1]],[[6,6,8,7,8,6],"113241",[6,6,1]],[[-1,-1,8,8,8,10],"001114",[8,4,2]]],"Ebm7":[[[-1,-1,1,3,2,2],"001423",0],[[6,6,8,6,7,6],"113121",[6,6,1]],[[-1,-1,8,8,7,9],"002314",0],[[11,13,11,11,11,11],"141111",[11,6,1]]],"E":[[[0,2,2,1,0,0],"023100",0],[[-1,-1,2,4,5,4],"001243",0],[[4,7,6,4,5,4],"143121",[4,6,1]],[[7,7,9,9,9,7],"112341",[7,6,1]]],"Em":[[[0,2,2,0,0,0],"023000",0],[[0,2,2,4,5,3],"011342",[2,5,4]],[[7,7,9,9,8,7],"113421",[7,6,1]],[[12,10,9,9,-1,-1],"431200",0]],"Esus2":[[[2,2,2,4,5,2],"111341",[2,6,1]],[[0,7,9,9,7,7],"013411",[7,5,1]],[[0,9,9,9,0,0],"012300",0],[[12,14,14,-1,12,14],"134014",[12,6,2]]],"Esus4":[[[0,2,2,2,0,0],"023400",0],[[0,2,2,4,5,5],"011234",[2,5,4]],[[7,7,9,9,10,7],"112341",[7,6,1]],[[-1,-1,9,9,10,0],"001120",[9,4,3]]],"E7":[[[0,2,0,1,0,0],"020100",0],[[-1,7,6,7,5,-1],"032410",0],[[7,7,9,7,9,7],"113141",[7,6,1]],[[-1,-1,9,9,9,10],"001112",[9,4,2]]],"Emaj7":[[[0,2,1,1,0,0],"031200",0],[[-1,-1,2,4,4,4],"001333",[4,3,1]],[[-1,7,6,4,4,4],"043111",[4,3,1]],[[7,7,9,8,9,7],"113241",[7,6,1]]],"Em7":[[[0,2,2,0,3,0],"023040",0],[[0,2,0,0,0,0],"020000",0],[[0,2,2,4,3,3],"011423",[2,5,4]],[[7,7,9,7,8,7],"113121",[7,6,1]],[[-1,-1,9,9,8,10],"002314",0]],"E/B":[[[-1,2,2,1,0,0],"023100",0],[[-1,2,2,4,5,4],"011343",[2,5,4]],[[7,7,9,9,9,7],"112341",[7,6,1]]],"Em/B":[[[-1,2,2,0,0,0],"012000",0],[[-1,2,2,0,0,3],"012003",0],[[-1,2,2,4,5,3],"011342",0]],"E/C#":[[[-1,4,6,4,5,4],"013121",[4,5,1]],[[-1,4,6,4,5,7],"013124",[4,5,3]],[[9,11,9,9,12,12],"131144",[9,6,3]]],"Em/C#":[[[-1,4,2,0,0,0],"031000",0],[[-1,4,5,4,5,7],"012134",0],[[9,10,9,12,12,12],"121444",[9,6,4]]],"E/D":[[[-1,-1,0,1,0,0],"000100",0],[[-1,5,6,4,5,4],"024131",[4,3,1]],[[-1,5,2,4,5,4],"031242",[4,3,1]]],"Em/D":[[[-1,-1,0,0,0,0],"000000",0],[[-1,5,5,4,5,-1],"023140",0],[[-1,-1,12,12,12,12],"001111",[12,4,1]]],"E/D#":[[[-1,-1,1,1,0,0],"001200",0],[[-1,6,6,4,5,4],"034121",[4,3,1]],[[11,11,9,9,12,12],"231144",[9,4,3]]],"Em/D#":[[[-1,-1,1,0,0,0],"001000",0],[[-1,6,5,4,5,-1],"042130",0],[[-1,6,9,9,8,-1],"013420",0]],"E/F":[[[1,2,2,1,0,0],"134200",0],[[-1,-1,3,1,0,0],"003100",0],[[-1,-1,3,4,5,4],"001243",0]],"E/F#":[[[2,2,2,1,0,0],"234100",0],[[-1,-1,4,4,5,4],"001121",[4,4,1]],[[2,2,2,4,5,4],"111343",[2,6,4]]],"E/G":[[[3,2,2,1,0,0],"423100",0],[[3,2,2,4,5,4],"211343",[2,5,4]],[[-1,-1,5,4,5,4],"003142",0]],"E/G#":[[[-1,-1,-1,1,0,0],"000100",0],[[4,2,2,1,0,0],"423100",0],[[4,7,6,4,5,4],"143121",[4,6,1]],[[4,2,2,4,5,-1],"211340",[2,5,4]]],"Em/F":[[[-1,-1,3,0,0,0],"001000",0],[[1,2,2,0,0,0],"123000",0],[[1,2,2,0,0,3],"123004",0]],"Em/F#":[[[2,2,2,0,0,0],"123000",0],[[2,2,2,0,0,3],"123004",0],[[2,2,2,4,5,3],"111342",[2,6,4]]],"Em/G":[[[3,2,2,0,0,0],"312000",0],[[3,2,2,0,0,3],"312004",0],[[3,2,2,4,5,0],"211340",[2,5,4]]],"Em/G#":[[[4,2,2,0,0,0],"412000",0],[[4,7,5,4,5,-1],"142130",[4,6,3]],[[-1,-1,6,4,5,3],"004231",0]],"F":[[[1,3,3,2,1,1],"134211",[1,6,1]],[[-1,3,3,5,6,5],"011243",[3,5,4]],[[5,8,7,5,6,5],"143121",[5,6,1]],[[8,8,10,10,10,8],"112341",[8,6,1]]],"Fm":[[[1,3,3,1,1,1],"134111",[1,6,1]],[[-1,-1,3,5,6,4],"001342",0],[[8,8,10,10,9,8],"113421",[8,6,1]],[[13,11,10,10,-1,-1],"421100",[10,4,3]]],"Fsus2":[[[1,3,3,-1,1,3],"123014",[1,6,2]],[[3,3,3,5,6,3],"111341",[3,6,1]],[[8,8,10,10,8,8],"113411",[8,6,1]],[[13,10,10,12,13,-1],"311240",[10,5,4]]],"Fsus4":[[[1,3,3,3,1,1],"123411",[1,6,1]],[[-1,-1,3,5,6,6],"001234",0],[[8,8,10,10,11,8],"112341",[8,6,1]],[[-1,-1,10,10,11,-1],"001120",[10,4,3]]],"F7":[[[1,3,1,2,1,1],"131211",[1,6,1]],[[-1,3,3,5,4,5],"011324",[3,5,4]],[[8,8,10,8,10,8],"113141",[8,6,1]],[[-1,-1,10,10,10,11],"001112",[10,4,2]]],"Fmaj7":[[[-1,-1,3,2,1,0],"003210",0],[[1,3,2,2,1,1],"142311",[1,6,1]],[[-1,3,3,5,5,5],"011333",[3,5,4]],[[8,8,10,9,10,8],"113241",[8,6,1]]],"Fm7":[[[1,3,1,1,1,1],"131111",[1,6,1]],[[-1,-1,3,5,4,4],"001423",0],[[8,8,10,8,9,8],"113121",[8,6,1]],[[-1,-1,10,10,9,11],"002314",0]],"F/C":[[[-1,3,3,2,1,1],"034211",[1,2,1]],[[-1,3,3,5,6,5],"011343",[3,5,4]],[[8,8,10,10,10,8],"112341",[8,6,1]]],"F/D":[[[-1,-1,0,2,1,1],"000211",[1,2,1]],[[-1,5,7,5,6,5],"013121",[5,5,1]],[[-1,5,7,5,6,8],"013124",0]],"F/D#":[[[-1,-1,1,2,1,1],"001211",[1,4,1]],[[-1,6,7,5,6,5],"024131",[5,3,1]],[[-1,6,3,5,6,5],"031242",[5,3,1]]],"F/E":[[[0,0,3,2,1,1],"003211",[1,2,1]],[[-1,-1,2,2,1,1],"002311",[1,2,1]],[[0,3,3,2,1,1],"034211",[1,2,1]]],"F/G":[[[3,0,3,2,1,1],"304211",[1,2,1]],[[3,3,3,2,-1,-1],"234100",0],[[3,3,3,5,6,5],"111343",[3,6,4]]],"F/A":[[[-1,0,3,2,1,1],"003211",[1,2,1]],[[5,3,3,2,-1,-1],"423100",0],[[5,3,3,5,6,0],"211340",[3,5,4]]],"Fm/C":[[[-1,3,3,1,1,1],"034111",[1,3,1]],[[-1,3,3,1,1,4],"023114",[1,3,2]],[[8,8,10,10,9,8],"113421",[8,6,1]]],"F#":[[[2,4,4,3,2,2],"134211",[2,6,1]],[[-1,4,4,6,7,6],"011243",[4,5,4]],[[6,9,8,6,7,6],"143121",[6,6,1]],[[9,9,11,11,11,9],"112341",[9,6,1]]],"F#m":[[[2,4,4,2,2,2],"134111",[2,6,1]],[[-1,4,4,6,7,5],"011342",[4,5,4]],[[-1,-1,7,6,7,5],"003241",0],[[9,9,11,11,10,9],"113421",[9,6,1]]],"F#sus2":[[[2,-1,-1,1,2,2],"200134",0],[[4,4,4,6,7,4],"111341",[4,6,1]],[[9,9,11,11,9,9],"113411",[9,6,1]],[[14,11,11,13,14,-1],"311240",[11,5,4]]],"F#sus4":[[[2,4,4,4,2,2],"123411",[2,6,1]],[[-1,4,4,6,7,7],"011234",[4,5,4]],[[9,9,11,11,12,9],"112341",[9,6,1]],[[-1,-1,11,11,12,14],"001124",[11,4,3]]],"F#7":[[[2,4,2,3,2,2],"131211",[2,6,1]],[[-1,4,4,6,5,6],"011324",[4,5,4]],[[-1,9,8,9,7,-1],"032410",0],[[9,9,11,9,11,9],"113141",[9,6,1]]],"F#maj7":[[[2,4,3,3,2,2],"142311",[2,6,1]],[[-1,4,4,6,6,6],"011333",[4,5,4]],[[-1,9,8,6,6,6],"043111",[6,3,1]],[[9,9,11,10,11,9],"113241",[9,6,1]]],"F#m7":[[[2,4,2,2,2,2],"131111",[2,6,1]],[[-1,-1,4,6,5,5],"001423",0],[[9,9,11,9,10,9],"113121",[9,6,1]],[[-1,-1,11,11,10,12],"002314",0]],"G":[[[3,2,0,0,0,3],"210003",0],[[3,5,5,4,3,3],"134211",[3,6,1]],[[-1,5,5,7,8,7],"011243",[5,5,4]],[[7,10,9,7,8,7],"143121",[7,6,1]]],"Gm":[[[3,1,0,0,3,3],"210034",0],[[3,5,5,3,3,3],"134111",[3,6,1]],[[-1,-1,5,7,8,6],"001342",0],[[10,10,12,12,11,10],"113421",[10,6,1]]],"Gsus2":[[[3,0,0,0,3,3],"100023",0],[[5,5,5,7,8,5],"111341",[5,6,1]],[[-1,10,7,7,8,10],"031124",[7,4,3]],[[10,10,12,12,10,10],"113411",[10,6,1]]],"Gsus4":[[[3,3,0,0,1,3],"230014",0],[[3,5,5,5,3,3],"123411",[3,6,1]],[[-1,5,5,7,8,8],"011344",[5,5,4]],[[10,10,12,12,13,10],"112341",[10,6,1]]],"G7":[[[3,2,0,0,0,1],"320001",0],[[3,5,3,4,3,3],"131211",[3,6,1]],[[-1,5,5,7,6,7],"011324",[5,5,4]],[[10,10,12,10,12,10],"113141",[10,6,1]]],"Gmaj7":[[[3,2,0,0,0,2],"320001",0],[[3,5,4,4,3,3],"142311",[3,6,1]],[[-1,5,5,7,7,7],"011333",[5,5,4]],[[-1,10,12,11,12,10],"013241",[10,5,1]]],"Gm7":[[[3,5,3,3,3,3],"131111",[3,6,1]],[[-1,5,5,7,6,6],"011423",[5,5,4]],[[-1,10,8,10,8,10],"021314",[8,4,2]],[[10,10,12,10,11,10],"113121",[10,6,1]]],"G/F#":[[[2,2,0,0,0,3],"120003",0],[[2,2,0,0,3,3],"120034",0],[[-1,-1,4,4,3,3],"002311",[3,2,1]]],"G/B":[[[-1,2,0,0,3,3],"010023",0],[[-1,2,0,0,0,3],"010002",0],[[-1,2,5,4,3,3],"014322",[3,2,1]]],"G/D":[[[-1,-1,0,0,0,3],"000001",0],[[-1,5,5,4,3,3],"034211",[3,2,1]],[[-1,5,5,7,8,7],"011343",[5,5,4]]],"G/E":[[[0,2,0,0,3,3],"010023",0],[[0,2,0,0,0,3],"010002",0],[[-1,-1,2,4,3,3],"001423",0]],"G/F":[[[1,2,0,0,3,3],"120034",0],[[1,2,0,0,0,3],"120003",0],[[-1,-1,3,4,3,3],"001211",0]],"Ab":[[[4,3,1,1,1,-1],"321110",[1,4,2]],[[4,6,6,5,4,4],"134211",[4,6,1]],[[-1,6,6,8,9,8],"011243",[6,5,4]],[[8,11,10,8,9,8],"143121",[8,6,1]]],"Abm":[[[4,6,6,4,4,4],"134111",[4,6,1]],[[-1,-1,6,8,9,7],"001342",0],[[-1,-1,9,8,9,7],"003241",0],[[11,11,13,13,12,11],"113421",[11,6,1]]],"Absus2":[[[4,-1,-1,3,4,4],"200134",0],[[4,6,6,-1,4,6],"123014",[4,6,2]],[[6,6,6,8,9,6],"111341",[6,6,1]],[[11,11,13,13,11,11],"113411",[11,6,1]]],"Absus4":[[[-1,-1,1,1,2,4],"001124",[1,4,3]],[[4,6,6,6,4,4],"123411",[4,6,1]],[[-1,6,6,8,9,9],"011234",[6,5,4]],[[11,11,13,13,14,11],"112341",[11,6,1]]],"Ab7":[[[-1,-1,1,1,1,2],"001112",[1,4,2]],[[4,6,4,5,4,4],"131211",[4,6,1]],[[-1,6,6,8,7,8],"011324",[6,5,4]],[[11,11,13,11,13,11],"113141",[11,6,1]]],"Abmaj7":[[[4,6,5,5,4,4],"142311",[4,6,1]],[[-1,6,6,8,8,8],"011333",[6,5,4]],[[-1,11,10,12,9,-1],"032410",0],[[11,11,13,12,13,11],"113241",[11,6,1]]],"Abm7":[[[4,6,4,4,4,4],"131111",[4,6,1]],[[-1,6,6,8,7,7],"011423",[6,5,4]],[[-1,11,9,11,9,-1],"021310",[9,4,2]],[[11,11,13,11,12,11],"113121",[11,6,1]]],"A":[[[-1,0,2,2,2,0],"001230",0],[[-1,0,2,2,2,5],"001114",[2,4,2]],[[5,7,7,6,5,5],"134211",[5,6,1]],[[-1,0,7,9,10,9],"001243",0]],"Am":[[[-1,0,2,2,1,0],"002310",0],[[-1,0,2,5,5,5],"001444",[5,3,1]],[[5,7,7,5,5,5],"134111",[5,6,1]],[[-1,0,7,9,10,8],"001342",0]],"Asus2":[[[-1,0,2,2,0,0],"002300",0],[[-1,0,2,4,0,0],"001400",0],[[7,7,7,9,10,7],"111341",[7,6,1]],[[-1,0,9,9,0,0],"001200",0]],"Asus4":[[[-1,0,2,2,3,0],"001230",0],[[-1,0,0,-1,3,0],"000010",0],[[5,7,7,7,5,5],"133411",[5,6,1]],[[-1,7,7,9,10,10],"011234",[7,5,4]]],"A7":[[[-1,0,2,0,2,0],"002030",0],[[-1,0,2,2,2,3],"001112",[2,4,2]],[[5,7,5,6,5,5],"131211",[5,6,1]],[[-1,0,7,9,8,9],"001324",0]],"Amaj7":[[[-1,0,2,1,2,0],"002130",0],[[-1,0,2,2,2,4],"001114",[2,4,2]],[[5,7,6,6,5,5],"142311",[5,6,1]],[[-1,0,7,9,9,9],"001333",[9,3,1]]],"Am7":[[[-1,0,2,0,1,0],"002010",0],[[-1,0,2,2,1,3],"002314",0],[[5,7,5,5,5,5],"131111",[5,6,1]],[[-1,7,7,9,8,8],"011423",[7,5,4]]],"A/C#":[[[-1,4,2,2,5,5],"031144",[2,4,3]],[[-1,4,2,2,2,5],"031114",[2,4,2]],[[-1,4,7,6,5,5],"014322",[5,2,1]]],"A/E":[[[0,0,2,2,2,0],"001230",0],[[-1,7,7,6,5,5],"034211",[5,2,1]],[[-1,-1,2,2,2,5],"001114",[2,4,2]]],"A/F":[[[1,0,2,2,2,0],"102340",0],[[-1,-1,3,2,2,0],"003120",0],[[1,4,2,2,2,-1],"142220",[2,4,2]]],"A/F#":[[[2,0,2,2,2,0],"102340",0],[[2,4,2,2,5,5],"131144",[2,6,3]],[[2,4,2,2,2,5],"131114",[2,6,2]]],"A/G":[[[3,0,2,2,2,0],"401230",0],[[-1,-1,5,6,5,5],"001211",[5,4,1]],[[3,4,2,2,5,5],"231144",0]],"A/G#":[[[4,4,2,2,5,5],"231144",[2,4,3]],[[4,4,2,2,2,5],"231114",[2,4,2]],[[-1,-1,6,6,5,5],"002311",[5,2,1]]],"Am/C":[[[-1,3,2,2,1,0],"042310",0],[[-1,3,2,5,5,5],"021444",[5,3,1]],[[-1,3,2,2,5,5],"021144",[2,4,3]]],"Am/E":[[[0,0,2,2,1,0],"002310",0],[[0,3,2,2,1,0],"042310",0],[[-1,7,7,5,5,5],"034111",[5,3,1]]],"Am/F":[[[1,0,2,2,1,0],"103420",0],[[-1,-1,3,2,1,0],"003210",0],[[1,3,2,2,1,-1],"142310",[1,6,2]]],"Am/F#":[[[2,0,2,2,1,0],"203410",0],[[-1,-1,4,5,5,5],"001234",0],[[2,3,2,5,5,5],"121444",[2,6,4]]],"Am/G":[[[-1,-1,5,5,5,5],"001111",[5,4,1]],[[3,0,2,2,1,0],"402310",0],[[3,3,2,5,5,5],"231444",[5,3,1]]],"Am/G#":[[[-1,-1,4,5,5,5],"002111",[5,3,1]],[[4,3,2,5,5,5],"321444",[5,3,1]],[[4,3,2,2,5,5],"321144",[2,4,3]]],"Bb":[[[-1,1,3,3,3,1],"012341",[1,5,1]],[[6,5,3,3,3,-1],"431110",[3,4,2]],[[6,8,8,7,6,6],"134211",[6,6,1]],[[-1,8,8,10,11,10],"011243",[8,5,4]]],"Bbm":[[[-1,1,3,3,2,1],"013421",[1,5,1]],[[6,8,8,6,6,6],"134111",[6,6,1]],[[-1,-1,8,6,6,6],"003111",[6,3,1]],[[-1,-1,8,10,11,9],"001342",0]],"Bbsus2":[[[1,1,3,3,1,1],"113411",[1,6,1]],[[6,3,3,5,6,-1],"311240",[3,5,4]],[[8,8,8,10,11,8],"111341",[8,6,1]],[[-1,13,10,10,11,13],"031124",[10,4,3]]],"Bbsus4":[[[-1,1,3,3,4,1],"012341",[1,5,1]],[[-1,-1,3,3,4,6],"001124",[3,4,3]],[[6,8,8,8,6,6],"133311",[6,6,1]],[[-1,8,8,10,11,11],"011234",[8,5,4]]],"Bb7":[[[-1,1,3,1,3,1],"013141",[1,5,1]],[[6,8,6,7,6,6],"131211",[6,6,1]],[[-1,8,8,10,9,10],"011324",[8,5,4]],[[-1,13,12,13,11,-1],"032410",0]],"Bbmaj7":[[[-1,1,3,2,3,1],"013241",[1,5,1]],[[-1,-1,3,3,3,5],"001114",[3,4,2]],[[6,8,7,7,6,6],"142311",[6,6,1]],[[-1,8,8,10,10,10],"011333",[8,5,4]]],"Bbm7":[[[-1,1,3,1,2,1],"013121",[1,5,1]],[[-1,-1,3,3,2,4],"002314",0],[[6,8,6,6,6,6],"131111",[6,6,1]],[[-1,8,8,10,9,9],"011423",[8,5,4]]],"B":[[[2,2,4,4,4,2],"112341",[2,6,1]],[[-1,-1,4,4,4,7],"001114",[4,4,2]],[[7,9,9,8,7,7],"134211",[7,6,1]],[[-1,9,9,11,12,11],"011243",[9,5,4]]],"Bm":[[[2,2,4,4,3,2],"113421",[2,6,1]],[[7,9,9,7,7,7],"134111",[7,6,1]],[[-1,-1,9,11,12,10],"001342",0],[[-1,-1,12,11,12,10],"003241",0]],"Bsus2":[[[2,2,4,4,2,2],"113411",[2,6,1]],[[7,-1,-1,6,7,7],"200134",0],[[9,9,9,11,12,9],"111341",[9,6,1]],[[-1,14,11,11,12,14],"031124",[11,4,3]]],"Bsus4":[[[2,2,4,4,5,2],"112341",[2,6,1]],[[-1,-1,4,4,5,7],"001124",[4,4,3]],[[7,9,9,9,7,7],"123411",[7,6,1]],[[-1,9,9,11,12,12],"011344",[9,5,4]]],"B7":[[[-1,2,1,2,0,2],"021304",0],[[2,2,4,2,4,2],"113141",[2,6,1]],[[-1,-1,4,4,4,5],"001112",[4,4,2]],[[7,9,7,8,7,7],"131211",[7,6,1]]],"Bmaj7":[[[2,2,4,3,4,2],"113241",[2,6,1]],[[-1,-1,4,4,4,6],"001114",[4,4,2]],[[7,9,8,8,7,7],"142311",[7,6,1]],[[-1,9,9,11,11,11],"011333",[9,5,4]]],"Bm7":[[[2,2,4,2,3,2],"113121",[2,6,1]],[[-1,-1,4,4,3,5],"002314",0],[[7,9,7,7,7,7],"131111",[7,6,1]],[[-1,9,9,11,10,10],"011423",[9,5,4]]]};
+const BN=['C','C#','D','D#','E','F','F#','G','G#','A','Bb','B'];
+const N=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+const PC={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+const QMAP={'':'',m:'m',min:'m','-':'m','7':'7',m7:'m7',min7:'m7',maj7:'maj7',M7:'maj7','Δ':'maj7',sus2:'sus2',sus4:'sus4',sus:'sus4'};
+// Doigtés ouverts : [frets, doigts, barré [case,corde de,corde à]]
+const OPEN={
+C:[['x32010','032010']],C7:[['x32310','032410']],Cmaj7:[['x32000','032000']],
+D:[['xx0232','000132']],Dm:[['xx0231','000231']],D7:[['xx0212','000213']],Dmaj7:[['xx0222','000123']],Dsus2:[['xx0230','000130']],Dsus4:[['xx0233','000134']],
+E:[['022100','023100']],Em:[['022000','023000']],E7:[['020100','020100']],Em7:[['020000','020000']],Emaj7:[['021100','032100']],
+F:[['xx3211','003211',[1,2,1]]],Fmaj7:[['xx3210','003210']],
+G:[['320003','210003']],G7:[['320001','320001']],
+A:[['x02220','001230']],Am:[['x02210','002310']],A7:[['x02020','001020']],Am7:[['x02010','002010']],Amaj7:[['x02120','002130']],Asus2:[['x02200','001200']],Asus4:[['x02230','001240']],
+B7:[['x21202','021304']]
+};
+// Formes barrées déplaçables (r = case du barré) : [qualité, forme, frets(r), doigts]
+const BARRE=[
+['','E',r=>[r,r+2,r+2,r+1,r,r],'134211',6],['m','E',r=>[r,r+2,r+2,r,r,r],'134111',6],
+['7','E',r=>[r,r+2,r,r+1,r,r],'131211',6],['m7','E',r=>[r,r+2,r,r,r,r],'131111',6],
+['','A',r=>[-1,r,r+2,r+2,r+2,r],'012341',5],['m','A',r=>[-1,r,r+2,r+2,r+1,r],'013421',5],
+['7','A',r=>[-1,r,r+2,r,r+2,r],'013141',5],['m7','A',r=>[-1,r,r+2,r,r+1,r],'013121',5],
+['maj7','A',r=>[-1,r,r+2,r+1,r+2,r],'013241',5]
+];
+const toF=s=>[...s].map(c=>c=='x'?-1:+c);
+function parse(t){
+  const m=t.match(/^([A-G])([#b]?)([^\/]*)(?:\/([A-G])([#b]?))?$/); if(!m) return null;
+  const sm=(a,b)=>(PC[a]+(b=='#'?1:b=='b'?-1:0)+12)%12, q=QMAP[m[3]];
+  return {root:sm(m[1],m[2]),q:q===undefined?null:q,bass:m[4]?sm(m[4],m[5]):null};
+}
+function candidates(root,q,bass){
+  const out=[], seen=new Set(), name=N[root]+q, key=bass==null?name:name+'/'+BN[bass];
+  const add=(f,g,b,base)=>{const k=f.join();if(seen.has(k))return;seen.add(k);out.push({f,g:[...g].map(Number),b,base,shape:name});};
+  (DB[key]||[]).forEach(([f,g,b])=>add(f,g,b||null,b?1+(b[1]-b[2]+1)*0.9:0));
+  if(bass!=null) return out;
+  (OPEN[name]||[]).forEach(([fs,gs,b])=>add(toF(fs),gs,b||null,b?3:0));
+  BARRE.forEach(([qq,form,fn,gs,from])=>{
+    if(qq!==q) return;
+    const r=((root-(form=='E'?4:9))%12+12)%12; if(r<1||r>9) return;
+    add(fn(r),gs,[r,from,1],5+r*0.15);
+  });
+  return out;
+}
+function nodeCost(c){
+  const fr=c.f.filter(x=>x>0), mn=fr.length?Math.min(...fr):0, mx=fr.length?Math.max(...fr):0;
+  const mutedInner=c.f.some((x,i)=>x<0&&i>0&&i<5&&c.f.slice(0,i).some(y=>y>=0)&&c.f.slice(i+1).some(y=>y>=0))?2:0;
+  return c.base+0.4*(mx-mn)+1.2*Math.max(0,mn-3)+0.15*fr.length+mutedInner;
+}
+const center=c=>{const fr=c.f.filter(x=>x>0);return fr.length?fr.reduce((a,b)=>a+b)/fr.length:0};
+function trans(a,b){
+  let common=0; for(let i=0;i<6;i++) if(a.f[i]>0&&a.f[i]==b.f[i]&&a.g[i]==b.g[i]) common++;
+  return 0.5*Math.abs(center(a)-center(b))-1.2*common;
+}
+function viterbi(layers){ // layers: tableaux de candidats ; renvoie {path,cost}
+  if(!layers.length) return {path:[],cost:0};
+  let dp=layers[0].map(c=>({c:nodeCost(c),p:-1})), hist=[dp];
+  for(let i=1;i<layers.length;i++){
+    dp=layers[i].map(c=>{let best=1e9,bp=0;
+      hist[i-1].forEach((h,j)=>{const v=h.c+trans(layers[i-1][j],c);if(v<best){best=v;bp=j;}});
+      return {c:best+nodeCost(c),p:bp};});
+    hist.push(dp);
+  }
+  let k=0; dp.forEach((h,j)=>{if(h.c<dp[k].c)k=j;});
+  const cost=dp[k].c, path=[];
+  for(let i=layers.length-1;i>=0;i--){path[i]=k;k=hist[i][k].p;}
+  return {path,cost};
+}
+// Construit les couches de candidats pour une grille, avec capo et niveau
+function build(tokens,capo,level,ov){
+  return tokens.map((t,i)=>{
+    const p=parse(t); if(!p||p.q===null) return {t,full:[],note:'accord non reconnu'};
+    let q=p.q, note='';
+    if(level=='easy'){ if(q=='m7')q='m'; else if(q=='maj7')q=''; }
+    const root=((p.root-capo)%12+12)%12;
+    const bs=(p.bass!==null&&p.bass!==p.root)?((p.bass-capo)%12+12)%12:null;
+    let full=candidates(root,q,bs);
+    if(!full.length&&bs!==null){full=candidates(root,q); if(full.length) note='sans la basse';}
+    if(!full.length&&q!==''&&q!=='m'){ // repli sur l'accord de base
+      const base=q.startsWith('m')&&q!='maj7'?'m':''; full=candidates(root,base);
+      if(full.length) note='simplifié en '+N[root]+base;
+    }
+    if(!full.length) return {t,full:[],note:'pas de diagramme'};
+    full.sort((a,b)=>nodeCost(a)-nodeCost(b)); full=full.slice(0,6); full.forEach((c,j)=>c.id=j);
+    return {t,full,note,pool:ov[i]!=null?[full[ov[i]%full.length]]:full,shape:N[root]+q};
+  });
+}
+function solve(items){
+  const idx=items.map((x,i)=>x.full.length?i:-1).filter(i=>i>=0);
+  const r=viterbi(idx.map(i=>items[i].pool));
+  const chosen={}; idx.forEach((i,k)=>chosen[i]=items[i].pool[r.path[k]]);
+  return {chosen,cost:r.cost};
+}
+// Dessin SVG
+function svg(c){
+  const X=i=>20+i*11, top=24, fh=15, rows=5;
+  const fr=c.f.filter(x=>x>0), mx=fr.length?Math.max(...fr):0, mn=fr.length?Math.min(...fr):1;
+  const start=mx<=5?1:mn;
+  let s=`<svg viewBox="0 0 100 106" role="img" aria-label="diagramme" fill="none" stroke="currentColor" stroke-width="1">`;
+  for(let i=0;i<6;i++) s+=`<line x1="${X(i)}" y1="${top}" x2="${X(i)}" y2="${top+rows*fh}"/>`;
+  for(let j=0;j<=rows;j++) s+=`<line x1="${X(0)}" y1="${top+j*fh}" x2="${X(5)}" y2="${top+j*fh}" ${j==0&&start==1?'stroke-width="3"':''}/>`;
+  if(start>1) s+=`<text x="${X(5)+6}" y="${top+fh*0.7}" font-size="9" fill="currentColor" stroke="none">${start}</text>`;
+  c.f.forEach((f,i)=>{ if(f<0) s+=`<text x="${X(i)}" y="16" font-size="10" text-anchor="middle" fill="currentColor" stroke="none">×</text>`;
+    else if(f==0) s+=`<circle cx="${X(i)}" cy="12" r="3" stroke-width="1.2"/>`;});
+  if(c.b){const [bf,a,z]=c.b,x1=X(6-a),x2=X(6-z),y=top+(bf-start+0.5)*fh;
+    s+=`<rect x="${x1-5}" y="${y-5}" width="${x2-x1+10}" height="10" rx="5" fill="var(--accent)" stroke="none"/>`;}
+  c.f.forEach((f,i)=>{ if(f<=0) return;
+    const inBar=c.b&&f==c.b[0]&&(6-i)<=c.b[1]&&(6-i)>=c.b[2];
+    const y=top+(f-start+0.5)*fh;
+    if(!inBar) s+=`<circle cx="${X(i)}" cy="${y}" r="5.5" fill="var(--accent)" stroke="none"/>`;
+    if(c.g[i]&&!inBar) s+=`<text x="${X(i)}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="var(--accent-ink)" stroke="none">${c.g[i]}</text>`;});
+  if(c.b){const y=top+(c.b[0]-start+0.5)*fh;
+    s+=`<text x="${X(6-c.b[1])}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="var(--accent-ink)" stroke="none">1</text>`;}
+  return s+'</svg>';
+}
+// Interface
+const $=id=>document.getElementById(id);
+const capoSel=$('capo'); for(let k=0;k<=7;k++) capoSel.add(new Option(k?`Case ${k}`:'Sans capo',k));
+let ov={};
+let chords=['Am','F','C','G7','Am','F','C','E7'];
+function tokens(){return chords.slice();}
+// Regroupe les accords identiques consécutifs : un seul diagramme par série
+function model(ovr){
+  const runs=[];
+  tokens().forEach((t,i)=>{const l=runs[runs.length-1]; if(l&&l.t==t) l.n++; else runs.push({t,i,n:1});});
+  const rov={}; runs.forEach((r,k)=>{if(ovr[r.i]!=null) rov[k]=ovr[r.i];});
+  const items=build(runs.map(r=>r.t),+capoSel.value,$('lvl').value,rov);
+  return {runs,items,rov,...solve(items)};
+}
+function render(){
+  const capo=+capoSel.value, lvl=$('lvl').value;
+  $('slots').innerHTML=chords.map((c,i)=>`<button class="chip" data-i="${i}">${c}</button>`).join('')+'<button class="chip add" id="add" aria-label="Ajouter un accord">+</button>';
+  const m=model(ov), {runs,items,chosen,rov}=m;
+  $('grid').innerHTML=items.map((it,i)=>{
+    const c=chosen[i], rep=runs[i].n>1?`${runs[i].n} mesures`:'';
+    if(!c) return `<div class="card" style="cursor:default"><b>${it.t}</b><small>${[rep,it.note].filter(Boolean).join(' · ')}</small></div>`;
+    const shape=capo?`forme ${it.shape}`:'', n=it.note||(it.full.length>1?`variante ${it.pool.length==1?(rov[i]%it.full.length)+1:c.id+1}/${it.full.length}`:'');
+    return `<div class="card" tabindex="0" role="button" data-i="${i}" aria-label="${it.t} : changer de variante"><b>${it.t}</b>${svg(c)}<small>${[rep,shape,n].filter(Boolean).join(' · ')}</small></div>`;
+  }).join('');
+  // suggestion de capo (calculée sur la suite d'accords sans répétitions consécutives)
+  const sg=$('sugg'); sg.style.display='none';
+  if(!Object.keys(ov).length){
+    const rt=runs.map(r=>r.t); let best=null,cur=null;
+    for(let k=0;k<=7;k++){
+      const r=solve(build(rt,k,lvl,{})), cost=r.cost+1.5*(k>0);
+      if(k==capo) cur=cost; if(!best||cost<best.cost) best={k,cost};
+    }
+    if(best.k!=capo&&cur-best.cost>=2){
+      $('suggT').textContent=best.k?`Avec un capo en case ${best.k}, cette grille devient plus facile à jouer.`:'Cette grille est plus facile à jouer sans capo.';
+      $('suggB').onclick=()=>{capoSel.value=best.k;render();}; sg.style.display='flex';
+    }
+  }
+}
+$('grid').addEventListener('click',e=>{
+  const el=e.target.closest('.card[data-i]'); if(!el) return;
+  const k=+el.dataset.i, m0=model({}), m=model(ov), full=m0.items[k].full;
+  if(full.length>1){const cur=m.chosen[k]; ov[m.runs[k].i]=((cur?cur.id:0)+1)%full.length; render();}
+});
+$('grid').addEventListener('keydown',e=>{if((e.key=='Enter'||e.key==' ')&&e.target.matches('.card[data-i]')){e.preventDefault();e.target.click();}});
+$('lvl').onchange=render; capoSel.onchange=render;
+// Sélecteur d'accord (feuille du bas)
+const QUAL=[['','Majeur'],['m','Mineur'],['7','7'],['m7','m7'],['maj7','maj7'],['sus2','sus2'],['sus4','sus4']];
+let cur=-1, sel={r:'C',q:'',b:''};
+function drawSheet(){
+  const o=(v,t,on,k,x)=>`<button class="opt${on?' on':''}${x||''}" data-k="${k}" data-v="${v}">${t}</button>`;
+  $('cols').innerHTML=`<div class="col"><h3>Fondamentale</h3><div class="opts two">${N.map(n=>o(n,n,sel.r==n,'r')).join('')}</div></div>`
+   +`<div class="col"><h3>Type</h3><div class="opts">${QUAL.map(([v,t])=>o(v,t,sel.q==v,'q')).join('')}</div></div>`
+   +`<div class="col"><h3>Basse</h3><div class="opts two">${o('','Aucune',!sel.b,'b',' full')+N.map(n=>o(n,n,sel.b==n,'b')).join('')}</div></div>`;
+  $('sheetT').textContent='Accord '+(cur+1)+' : '+chords[cur];
+}
+function openSheet(i){
+  cur=i; const m=chords[i].match(/^([A-G][#b]?)([^\/]*)(?:\/([A-G][#b]?))?$/)||[];
+  sel={r:m[1]||'C',q:QMAP[m[2]]??'',b:m[3]||''};
+  drawSheet(); $('sheet').classList.add('open'); $('ok').focus();
+}
+function closeSheet(){$('sheet').classList.remove('open');}
+$('slots').onclick=e=>{const b=e.target.closest('button'); if(!b) return;
+  if(b.id=='add'){chords.push('C');ov={};render();openSheet(chords.length-1);}
+  else openSheet(+b.dataset.i);};
+$('cols').onclick=e=>{const b=e.target.closest('.opt'); if(!b) return;
+  sel[b.dataset.k]=b.dataset.v; if(sel.b===sel.r) sel.b='';
+  chords[cur]=sel.r+sel.q+(sel.b?'/'+sel.b:''); delete ov[cur]; drawSheet(); render();};
+$('ok').onclick=closeSheet; $('back').onclick=closeSheet;
+$('del').onclick=()=>{chords.splice(cur,1); ov={}; closeSheet(); render();};
+// Grilles types : [nom, [[intervalle en demi-tons depuis la tonique, type], ...]]
+const PRE=[
+ ['Blues 12 mesures',[[0,'7'],[0,'7'],[0,'7'],[0,'7'],[5,'7'],[5,'7'],[0,'7'],[0,'7'],[7,'7'],[5,'7'],[0,'7'],[7,'7']]],
+ ['Blues 12 mesures (quick change)',[[0,'7'],[5,'7'],[0,'7'],[0,'7'],[5,'7'],[5,'7'],[0,'7'],[0,'7'],[7,'7'],[5,'7'],[0,'7'],[7,'7']]],
+ ['Blues mineur 12 mesures',[[0,'m'],[0,'m'],[0,'m'],[0,'m'],[5,'m'],[5,'m'],[0,'m'],[0,'m'],[8,'7'],[7,'7'],[0,'m'],[7,'7']]],
+ ['Blues 8 mesures',[[0,'7'],[7,'7'],[5,'7'],[5,'7'],[0,'7'],[7,'7'],[0,'7'],[7,'7']]],
+ ['Pop : I – V – vi – IV',[[0,''],[7,''],[9,'m'],[5,'']]],
+ ['Années 50 : I – vi – IV – V',[[0,''],[9,'m'],[5,''],[7,'']]],
+ ['I – IV – V – I',[[0,''],[5,''],[7,''],[0,'']]],
+ ['vi – IV – I – V',[[9,'m'],[5,''],[0,''],[7,'']]],
+ ['Andalouse : i – ♭VII – ♭VI – V',[[0,'m'],[10,''],[8,''],[7,'']]],
+ ['Jazz : ii – V – I',[[2,'m7'],[7,'7'],[0,'maj7']]]
+];
+let pk=0;
+const mk=(k,[o,q])=>N[(k+o)%12]+q;
+function drawP(){
+  const o=(on,k,v,t)=>`<button class="opt${on?' on':''}" data-k="${k}" data-v="${v}">${t}</button>`;
+  $('pcols').innerHTML=`<div class="col"><h3>Tonalité</h3><div class="opts two">${N.map((n,i)=>o(pk==i,'k',i,n)).join('')}</div></div>`
+   +`<div class="col"><h3>Grille en ${N[pk]}</h3><div class="opts">${PRE.map(([t,g],i)=>`<button class="opt pre" data-k="p" data-v="${i}">${t}<small>${[...new Set(g.map(x=>mk(pk,x)))].join(' · ')}</small></button>`).join('')}</div></div>`;
+}
+const closeP=()=>$('psheet').classList.remove('open');
+$('presets').onclick=()=>{drawP();$('psheet').classList.add('open');$('pok').focus();};
+$('pok').onclick=closeP; $('pback').onclick=closeP;
+$('pcols').onclick=e=>{const b=e.target.closest('.opt'); if(!b) return;
+  if(b.dataset.k=='k'){pk=+b.dataset.v;drawP();return;}
+  chords=PRE[+b.dataset.v][1].map(x=>mk(pk,x)); ov={}; closeP(); render();};
+document.addEventListener('keydown',e=>{if(e.key=='Escape'){closeSheet();closeP();}});
+render();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}</script>
+</body>
+</html>
