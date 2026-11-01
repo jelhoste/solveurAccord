@@ -19,3 +19,8 @@ Remplacer les fichiers sur l'hébergement. La nouvelle version apparaît à la v
 
 4) EXPORT / IMPORT
 Les boutons « Exporter » et « Importer » enregistrent et rechargent la grille (accords, niveau, capo et doigtés choisis) dans un fichier grille-accords.json. Cela fonctionne dans l'appli hébergée ou installée.
+
+5) PARTAGE PAR LIEN
+Le bouton « Partager » crée un lien qui contient la grille, le niveau, le capo et les doigtés choisis à la main, puis propose : copier le lien, l'envoyer par e-mail (logiciel de messagerie par défaut), l'ouvrir dans Gmail, ou le partager via le menu du téléphone.
+Le lien pointe vers l'adresse où l'appli est hébergée : la personne qui l'ouvre arrive directement sur ta grille. Les données voyagent uniquement dans le lien (après le « # »), elles ne sont envoyées à aucun serveur.
+Si tu déplaces l'appli à une autre adresse, les anciens liens partagés ne marcheront plus.

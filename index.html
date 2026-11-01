@@ -65,6 +65,11 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .card.pn{width:236px}
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+#ssheet{position:fixed;inset:0;display:none;z-index:10}
+#ssheet.open{display:block}
+.lk{width:100%;font:.8rem ui-monospace,Consolas,monospace;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
+.acts a{display:inline-block;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);color:var(--accent);font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
@@ -72,7 +77,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 <h1>Diagrammes d'accords</h1>
 <p class="lead">Compose ta grille avec les boutons d'accords : la page choisit pour chacun le doigté le plus facile à enchaîner pour un débutant.</p>
 <div class="panel">
-<div class="tools"><button class="sec" id="presets">Grilles types (blues, pop…)</button><button class="sec" id="exp">Exporter</button><button class="sec" id="impB">Importer</button><input type="file" id="imp" accept=".json,application/json" hidden><span id="msg" class="hint" style="margin:0" aria-live="polite"></span></div>
+<div class="tools"><button class="sec" id="presets">Grilles types (blues, pop…)</button><button class="sec" id="exp">Exporter</button><button class="sec" id="impB">Importer</button><button id="shr">Partager</button><input type="file" id="imp" accept=".json,application/json" hidden><span id="msg" class="hint" style="margin:0" aria-live="polite"></span></div>
 <div id="slots" class="chips" aria-label="Grille d'accords"></div>
 <div class="row">
 <label>Niveau<select id="lvl"><option value="full">Complet (7, maj7, m7)</option><option value="easy">Simplifié (accords de base)</option></select></label>
@@ -85,6 +90,14 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 <div id="grid" aria-live="polite"></div>
 <p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Clique sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de ton choix. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
 </main>
+<div id="ssheet"><div class="back" id="sback"></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sT">
+<div class="sh"><strong id="sT">Partager cette grille</strong><button id="sok">Fermer</button></div>
+<p class="hint" style="margin:0 0 8px">Le lien contient la grille, le niveau, le capo et tes choix de doigtés : la personne qui l'ouvre arrive directement sur ta version.</p>
+<input class="lk" id="slink" readonly aria-label="Lien de partage">
+<div class="acts"><button id="scopy">Copier le lien</button><a id="smail" href="#">E-mail</a><a id="sgm" href="#" target="_blank" rel="noopener">Gmail</a><button class="sec" id="snat">Partager…</button><span id="sfb" class="hint" style="margin:0" aria-live="polite"></span></div>
+<p class="hint" id="swarn" style="margin-bottom:0"></p>
+</div></div>
 <div id="psheet"><div class="back" id="pback"></div>
 <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pT">
 <div class="sh"><strong id="pT">Grilles types</strong><button id="pok">Fermer</button></div>
@@ -315,7 +328,7 @@ $('pok').onclick=closeP; $('pback').onclick=closeP;
 $('pcols').onclick=e=>{const b=e.target.closest('.opt'); if(!b) return;
   if(b.dataset.k=='k'){pk=+b.dataset.v;drawP();return;}
   chords=PRE[+b.dataset.v][1].map(x=>mk(pk,x)); ov={};ovP={}; closeP(); render();};
-document.addEventListener('keydown',e=>{if(e.key=='Escape'){closeSheet();closeP();}});
+document.addEventListener('keydown',e=>{if(e.key=='Escape'){closeSheet();closeP();closeS();}});
 // ==PIANO==
 const IV={'':[0,4,7],'5':[0,7],'5(2)':[0,7],m:[0,3,7],'7':[0,4,7,10],m7:[0,3,7,10],maj7:[0,4,7,11],sus2:[0,2,7],sus4:[0,5,7]};
 const INV=['position fondamentale','1er renversement','2e renversement','3e renversement'];
@@ -427,6 +440,48 @@ $('imp').onchange=async e=>{
   let n=0; try{ n=applyImport(JSON.parse(await f.text())); }catch(_){}
   $('msg').textContent=n?`Grille importée (${n} accords).`:'Fichier non reconnu.'; if(n) render();
 };
+// ==SHARE==
+// Lien de partage : tout est dans la partie après « # » (jamais envoyée à un serveur). On n'y met que les choix manuels.
+const b64e=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0)));
+function buildShare(){
+  const g=model(ov), p=modelP(ovP);
+  const pick=(m,pins,f)=>m.runs.map((r,k)=>({r,c:m.chosen[k]})).filter(x=>x.c&&pins[x.r.i]!=null).map(x=>f(x.r,x.c));
+  return {app:'diagrammes-accords',version:1,chords:chords.slice(),level:$('lvl').value,capo:+capoSel.value,tab,
+    guitare:pick(g,ov,(r,c)=>({accord:r.t,mesure:r.i+1,frettes:c.f})),
+    piano:pick(p,ovP,(r,c)=>({accord:r.t,mesure:r.i+1,main_gauche:c.bm,main_droite:c.n}))};
+}
+const shareLink=()=>location.href.split('#')[0]+'#s='+b64e(JSON.stringify(buildShare()));
+function decodeShare(hash){const m=(hash||'').match(/^#s=([\w-]+)$/); if(!m) return null; try{return JSON.parse(b64d(m[1]));}catch(_){return null;}}
+// ==/SHARE==
+function loadFromHash(){
+  if(!/^#s=/.test(location.hash)) return;
+  const d=decodeShare(location.hash);
+  if(d&&applyImport(d)){ setTab(d.tab=='p'?'p':'g'); $('msg').textContent='Grille partagée chargée.'; }
+  else $('msg').textContent='Lien de partage invalide.';
+}
+const closeS=()=>$('ssheet').classList.remove('open');
+function openShare(){
+  const url=shareLink(), grid=chords.join(' | '), fb=$('sfb');
+  const subject="Grille d'accords : "+chords.slice(0,4).join(' ')+(chords.length>4?'…':'');
+  const body=("Voici une grille d'accords :\n"+grid+"\n\nOuvre ce lien pour la voir avec les diagrammes (guitare et piano) et les doigtés choisis :\n"+url).replace(/\n/g,'\r\n');
+  $('slink').value=url; fb.textContent='';
+  $('smail').href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  $('sgm').href='https://mail.google.com/mail/?view=cm&fs=1&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  $('snat').style.display=navigator.share?'':'none';
+  $('snat').onclick=()=>navigator.share({title:subject,text:"Grille d'accords : "+grid,url}).catch(()=>{});
+  $('swarn').textContent=!/^https?:/.test(url)?"Ce lien ne fonctionnera que si l'appli est ouverte depuis son adresse web (hébergée).":
+    url.length>1800?"Ce lien est long : certains logiciels de messagerie peuvent le tronquer. Dans ce cas, utilise plutôt « Exporter ».":'';
+  $('ssheet').classList.add('open'); $('sok').focus();
+}
+$('shr').onclick=openShare; $('sok').onclick=closeS; $('sback').onclick=closeS;
+$('scopy').onclick=async()=>{
+  const i=$('slink'); i.select();
+  try{ await navigator.clipboard.writeText(i.value); $('sfb').textContent='Lien copié.'; }
+  catch(_){ let ok=false; try{ok=document.execCommand('copy');}catch(__){} $('sfb').textContent=ok?'Lien copié.':'Copie automatique impossible : le lien est sélectionné, copie-le à la main.'; }
+};
+window.addEventListener('hashchange',loadFromHash);
+loadFromHash();
 render();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}</script>
