@@ -29,7 +29,7 @@ Si tu déplaces l'appli à une autre adresse, les anciens liens partagés ne mar
  - theme.css : fichier à modifier (couleurs, arrondis, polices, couleurs du clavier de piano). Tout y est expliqué et commenté.
  - Réglages dans l'adresse (pratique pour une intégration en <iframe>, sans toucher aux fichiers) :
      https://ton-site/accords/?theme=dark&accent=ff6600&bg=101418&radius=4&font=Georgia&strings=1
-   theme : light, dark ou auto | strings : 1 = cordes d'épaisseurs réalistes
+   theme : light, dark ou auto | strings : 1 = cordes d'épaisseurs réalistes (par défaut), 0 = cordes uniformes
    Couleurs (hexadécimal, avec ou sans #) : bg, panel, ink, muted, line, accent, accentink, warn, bass, key, keyline, blackkey
    radius : arrondi en px | font, fonttitle : polices (ex. Georgia)
    Les liens de partage conservent ces réglages.

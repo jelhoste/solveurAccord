@@ -149,7 +149,7 @@ function structureToChord(s){
 // ==COMPAT==
 // Versions. APP_VERSION : l'appli (semver ; garder identique à VERSION dans sw.js). SCHEMA_VERSION : format des fichiers d'export
 // et des liens de partage (entier, +1 à chaque changement incompatible ; les ajouts de champs ne le changent pas).
-const APP_VERSION='1.1.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
+const APP_VERSION='1.2.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
 // MIGRATIONS[n] transforme un document de format n en format n+1. Ne jamais modifier une migration déjà publiée : en ajouter une.
 const MIGRATIONS={
   1:d=>({...d,schema:2,structure:(Array.isArray(d.chords)?d.chords:[]).map(chordToStructure)})   // v1 : symboles seuls
@@ -289,7 +289,7 @@ function svg(c){
 // Interface
 const $=id=>document.getElementById(id);
 const capoSel=$('capo'); for(let k=0;k<=7;k++) capoSel.add(new Option(k?`Case ${k}`:'Sans capo',k));
-let ov={}, ovP={}, tab='g', thick=false;
+let ov={}, ovP={}, tab='g', thick=true;
 let chords=['Am','F','C','G7','Am','F','C','E7'];
 function tokens(){return chords.slice();}
 // Regroupe les accords identiques consécutifs : un seul diagramme par série
@@ -582,7 +582,8 @@ const setMode=t=>{ if(t==='light'||t==='dark') document.documentElement.dataset.
   const mode=th.theme||(['auto','light','dark'].includes(saved)?saved:'auto');
   $('thm').value=mode; setMode(mode);
   Object.entries(th.vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
-  thick=th.strings!==null?th.strings:pref('strings')==='1'; $('strg').value=thick?'1':'0';
+  // Épaisseurs réalistes par défaut : seul un choix explicite « uniformes » (0) les désactive.
+  thick=th.strings!==null?th.strings:pref('strings')!=='0'; $('strg').value=thick?'1':'0';
 }
 $('thm').onchange=()=>{setMode($('thm').value); pref('theme',$('thm').value);};
 $('strg').onchange=()=>{thick=$('strg').value==='1'; pref('strings',thick?'1':'0'); render();};

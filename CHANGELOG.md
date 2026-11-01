@@ -3,6 +3,10 @@
 Versionnage : `APP_VERSION` suit le semver (MAJEUR.MINEUR.CORRECTIF) ; `SCHEMA_VERSION` est le numéro entier du format des
 fichiers d'export et des liens de partage (voir FORMAT.md).
 
+## 1.2.0 - 2026-11-01 (format de fichier : 2, inchangé)
+- Les cordes de guitare sont affichées avec des épaisseurs réalistes par défaut. Le menu « Cordes » permet de revenir aux cordes uniformes ;
+  un choix déjà fait sur un appareil est respecté. Paramètre d'adresse : `strings=0` (uniformes) ou `strings=1` (réalistes).
+
 ## 1.1.0 - 2026-11-01 (format de fichier : 2, inchangé)
 - Les fichiers d'export notent l'origine de chaque choix de doigté (guitare) et de renversement (piano) : `origine` = `manuel` ou `auto`.
   À l'import, les choix `manuel` sont repris tels quels et restent manuels ; les anciens fichiers (sans ce champ) se lisent comme avant.
