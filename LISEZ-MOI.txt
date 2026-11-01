@@ -16,3 +16,6 @@ Après la première visite en ligne, l'appli fonctionne sans connexion.
 
 3) METTRE À JOUR
 Remplacer les fichiers sur l'hébergement. La nouvelle version apparaît à la visite suivante (parfois après avoir fermé puis rouvert l'appli). Si une ancienne version persiste, changer le nom du cache dans sw.js (CACHE='accords-v2').
+
+4) EXPORT / IMPORT
+Les boutons « Exporter » et « Importer » enregistrent et rechargent la grille (accords, niveau, capo et doigtés choisis) dans un fichier grille-accords.json. Cela fonctionne dans l'appli hébergée ou installée.

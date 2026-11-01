@@ -59,6 +59,12 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 .p2{grid-template-columns:1fr 1.7fr}
 .pre{text-align:left;padding:10px 12px}
 .pre small{display:block;font-weight:400;opacity:.8;margin-top:2px}
+:root{--bass:#d9731f;--keyline:#8a98a1;--blackkey:#1b242b}
+.tabs{display:flex;gap:6px;margin-top:16px}
+.tabs button{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 20px}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.card.pn{width:236px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -66,17 +72,18 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 <h1>Diagrammes d'accords</h1>
 <p class="lead">Compose ta grille avec les boutons d'accords : la page choisit pour chacun le doigté le plus facile à enchaîner pour un débutant.</p>
 <div class="panel">
-<div style="margin-bottom:10px"><button class="sec" id="presets">Grilles types (blues, pop…)</button></div>
+<div class="tools"><button class="sec" id="presets">Grilles types (blues, pop…)</button><button class="sec" id="exp">Exporter</button><button class="sec" id="impB">Importer</button><input type="file" id="imp" accept=".json,application/json" hidden><span id="msg" class="hint" style="margin:0" aria-live="polite"></span></div>
 <div id="slots" class="chips" aria-label="Grille d'accords"></div>
 <div class="row">
 <label>Niveau<select id="lvl"><option value="full">Complet (7, maj7, m7)</option><option value="easy">Simplifié (accords de base)</option></select></label>
-<label>Capo<select id="capo"></select></label>
+<label id="capoL">Capo<select id="capo"></select></label>
 
 </div>
 <div id="sugg"><span id="suggT"></span><button id="suggB">Appliquer</button></div>
 </div>
+<div class="tabs" role="tablist"><button role="tab" id="tabG" aria-selected="true">Guitare</button><button role="tab" id="tabP" aria-selected="false">Piano</button></div>
 <div id="grid" aria-live="polite"></div>
-<p class="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Clique sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de ton choix. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
+<p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Clique sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de ton choix. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
 </main>
 <div id="psheet"><div class="back" id="pback"></div>
 <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="pT">
@@ -91,7 +98,7 @@ const DB={"C":[[[-1,3,2,0,1,0],"032010",0],[[3,3,5,5,5,3],"112341",[3,6,1]],[[-1
 const BN=['C','C#','D','D#','E','F','F#','G','G#','A','Bb','B'];
 const N=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
 const PC={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
-const QMAP={'':'',m:'m',min:'m','-':'m','7':'7',m7:'m7',min7:'m7',maj7:'maj7',M7:'maj7','Δ':'maj7',sus2:'sus2',sus4:'sus4',sus:'sus4'};
+const QMAP={'':'',m:'m',min:'m','-':'m','7':'7',m7:'m7',min7:'m7',maj7:'maj7',M7:'maj7','Δ':'maj7',sus2:'sus2',sus4:'sus4',sus:'sus4','5':'5','5(3)':'5','5(2)':'5(2)'};
 // Doigtés ouverts : [frets, doigts, barré [case,corde de,corde à]]
 const OPEN={
 C:[['x32010','032010']],C7:[['x32310','032410']],Cmaj7:[['x32000','032000']],
@@ -121,6 +128,14 @@ function candidates(root,q,bass){
   const add=(f,g,b,base)=>{const k=f.join();if(seen.has(k))return;seen.add(k);out.push({f,g:[...g].map(Number),b,base,shape:name});};
   (DB[key]||[]).forEach(([f,g,b])=>add(f,g,b||null,b?1+(b[1]-b[2]+1)*0.9:0));
   if(bass!=null) return out;
+  if(q==='5'||q==='5(2)'){ // power chords : 5 = fondamentale + quinte + octave (3 notes) ; 5(2) = fondamentale + quinte (2 notes)
+    (q==='5'?[[4,r=>[r,r+2,r+2,-1,-1,-1]],[9,r=>[-1,r,r+2,r+2,-1,-1]],[2,r=>[-1,-1,r,r+2,r+3,-1]]]
+            :[[4,r=>[r,r+2,-1,-1,-1,-1]],[9,r=>[-1,r,r+2,-1,-1,-1]],[2,r=>[-1,-1,r,r+2,-1,-1]]]).forEach(([open,fn])=>{
+      const r=((root-open)%12+12)%12; if(r>9) return;
+      const f=fn(r), fg=r>0?[1,3,4]:[0,1,2]; let k=0;
+      add(f,f.map(v=>v>=0?fg[k++]:0),null,0);
+    });
+  }
   (OPEN[name]||[]).forEach(([fs,gs,b])=>add(toF(fs),gs,b||null,b?3:0));
   BARRE.forEach(([qq,form,fn,gs,from])=>{
     if(qq!==q) return;
@@ -139,13 +154,13 @@ function trans(a,b){
   let common=0; for(let i=0;i<6;i++) if(a.f[i]>0&&a.f[i]==b.f[i]&&a.g[i]==b.g[i]) common++;
   return 0.5*Math.abs(center(a)-center(b))-1.2*common;
 }
-function viterbi(layers){ // layers: tableaux de candidats ; renvoie {path,cost}
+function viterbi(layers,NC=nodeCost,TR=trans){ // layers: tableaux de candidats ; renvoie {path,cost}
   if(!layers.length) return {path:[],cost:0};
-  let dp=layers[0].map(c=>({c:nodeCost(c),p:-1})), hist=[dp];
+  let dp=layers[0].map(c=>({c:NC(c),p:-1})), hist=[dp];
   for(let i=1;i<layers.length;i++){
     dp=layers[i].map(c=>{let best=1e9,bp=0;
-      hist[i-1].forEach((h,j)=>{const v=h.c+trans(layers[i-1][j],c);if(v<best){best=v;bp=j;}});
-      return {c:best+nodeCost(c),p:bp};});
+      hist[i-1].forEach((h,j)=>{const v=h.c+TR(layers[i-1][j],c);if(v<best){best=v;bp=j;}});
+      return {c:best+NC(c),p:bp};});
     hist.push(dp);
   }
   let k=0; dp.forEach((h,j)=>{if(h.c<dp[k].c)k=j;});
@@ -172,9 +187,9 @@ function build(tokens,capo,level,ov){
     return {t,full,note,pool:ov[i]!=null?[full[ov[i]%full.length]]:full,shape:N[root]+q};
   });
 }
-function solve(items){
+function solve(items,NC,TR){
   const idx=items.map((x,i)=>x.full.length?i:-1).filter(i=>i>=0);
-  const r=viterbi(idx.map(i=>items[i].pool));
+  const r=viterbi(idx.map(i=>items[i].pool),NC,TR);
   const chosen={}; idx.forEach((i,k)=>chosen[i]=items[i].pool[r.path[k]]);
   return {chosen,cost:r.cost};
 }
@@ -203,7 +218,7 @@ function svg(c){
 // Interface
 const $=id=>document.getElementById(id);
 const capoSel=$('capo'); for(let k=0;k<=7;k++) capoSel.add(new Option(k?`Case ${k}`:'Sans capo',k));
-let ov={};
+let ov={}, ovP={}, tab='g';
 let chords=['Am','F','C','G7','Am','F','C','E7'];
 function tokens(){return chords.slice();}
 // Regroupe les accords identiques consécutifs : un seul diagramme par série
@@ -214,7 +229,7 @@ function model(ovr){
   const items=build(runs.map(r=>r.t),+capoSel.value,$('lvl').value,rov);
   return {runs,items,rov,...solve(items)};
 }
-function render(){
+function renderG(){
   const capo=+capoSel.value, lvl=$('lvl').value;
   $('slots').innerHTML=chords.map((c,i)=>`<button class="chip" data-i="${i}">${c}</button>`).join('')+'<button class="chip add" id="add" aria-label="Ajouter un accord">+</button>';
   const m=model(ov), {runs,items,chosen,rov}=m;
@@ -240,18 +255,21 @@ function render(){
 }
 $('grid').addEventListener('click',e=>{
   const el=e.target.closest('.card[data-i]'); if(!el) return;
-  const k=+el.dataset.i, m0=model({}), m=model(ov), full=m0.items[k].full;
+  const k=+el.dataset.i;
+  if(tab=='p'){const full=modelP({}).items[k].full, m=modelP(ovP);
+    if(full.length>1){const c=m.chosen[k]; ovP[m.runs[k].i]=((c?c.id:0)+1)%full.length; render();} return;}
+  const full=model({}).items[k].full, m=model(ov);
   if(full.length>1){const cur=m.chosen[k]; ov[m.runs[k].i]=((cur?cur.id:0)+1)%full.length; render();}
 });
 $('grid').addEventListener('keydown',e=>{if((e.key=='Enter'||e.key==' ')&&e.target.matches('.card[data-i]')){e.preventDefault();e.target.click();}});
 $('lvl').onchange=render; capoSel.onchange=render;
 // Sélecteur d'accord (feuille du bas)
-const QUAL=[['','Majeur'],['m','Mineur'],['7','7'],['m7','m7'],['maj7','maj7'],['sus2','sus2'],['sus4','sus4']];
+const QUAL=[['','–','Majeur'],['m','m','Mineur'],['7','7'],['m7','m7'],['maj7','maj7'],['sus2','sus2'],['sus4','sus4'],['5','5 (3)','Power chord à 3 notes'],['5(2)','5 (2)','Power chord à 2 notes']];
 let cur=-1, sel={r:'C',q:'',b:''};
 function drawSheet(){
-  const o=(v,t,on,k,x)=>`<button class="opt${on?' on':''}${x||''}" data-k="${k}" data-v="${v}">${t}</button>`;
+  const o=(v,t,on,k,x,al)=>`<button class="opt${on?' on':''}${x||''}" data-k="${k}" data-v="${v}"${al?` aria-label="${al}" title="${al}"`:''}>${t}</button>`;
   $('cols').innerHTML=`<div class="col"><h3>Fondamentale</h3><div class="opts two">${N.map(n=>o(n,n,sel.r==n,'r')).join('')}</div></div>`
-   +`<div class="col"><h3>Type</h3><div class="opts">${QUAL.map(([v,t])=>o(v,t,sel.q==v,'q')).join('')}</div></div>`
+   +`<div class="col"><h3>Type</h3><div class="opts two">${QUAL.map(([v,t,a])=>o(v,t,sel.q==v,'q','',a)).join('')}</div></div>`
    +`<div class="col"><h3>Basse</h3><div class="opts two">${o('','Aucune',!sel.b,'b',' full')+N.map(n=>o(n,n,sel.b==n,'b')).join('')}</div></div>`;
   $('sheetT').textContent='Accord '+(cur+1)+' : '+chords[cur];
 }
@@ -262,13 +280,13 @@ function openSheet(i){
 }
 function closeSheet(){$('sheet').classList.remove('open');}
 $('slots').onclick=e=>{const b=e.target.closest('button'); if(!b) return;
-  if(b.id=='add'){chords.push('C');ov={};render();openSheet(chords.length-1);}
+  if(b.id=='add'){chords.push('C');ov={};ovP={};render();openSheet(chords.length-1);}
   else openSheet(+b.dataset.i);};
 $('cols').onclick=e=>{const b=e.target.closest('.opt'); if(!b) return;
   sel[b.dataset.k]=b.dataset.v; if(sel.b===sel.r) sel.b='';
-  chords[cur]=sel.r+sel.q+(sel.b?'/'+sel.b:''); delete ov[cur]; drawSheet(); render();};
+  chords[cur]=sel.r+sel.q+(sel.b?'/'+sel.b:''); delete ov[cur]; delete ovP[cur]; drawSheet(); render();};
 $('ok').onclick=closeSheet; $('back').onclick=closeSheet;
-$('del').onclick=()=>{chords.splice(cur,1); ov={}; closeSheet(); render();};
+$('del').onclick=()=>{chords.splice(cur,1); ov={};ovP={}; closeSheet(); render();};
 // Grilles types : [nom, [[intervalle en demi-tons depuis la tonique, type], ...]]
 const PRE=[
  ['Blues 12 mesures',[[0,'7'],[0,'7'],[0,'7'],[0,'7'],[5,'7'],[5,'7'],[0,'7'],[0,'7'],[7,'7'],[5,'7'],[0,'7'],[7,'7']]],
@@ -280,6 +298,8 @@ const PRE=[
  ['I – IV – V – I',[[0,''],[5,''],[7,''],[0,'']]],
  ['vi – IV – I – V',[[9,'m'],[5,''],[0,''],[7,'']]],
  ['Andalouse : i – ♭VII – ♭VI – V',[[0,'m'],[10,''],[8,''],[7,'']]],
+ ['Power chords : I5 – IV5 – V5 – IV5',[[0,'5'],[5,'5'],[7,'5'],[5,'5']]],
+ ['Power chords : i5 – ♭VI5 – ♭VII5 – i5',[[0,'5'],[8,'5'],[10,'5'],[0,'5']]],
  ['Jazz : ii – V – I',[[2,'m7'],[7,'7'],[0,'maj7']]]
 ];
 let pk=0;
@@ -294,8 +314,119 @@ $('presets').onclick=()=>{drawP();$('psheet').classList.add('open');$('pok').foc
 $('pok').onclick=closeP; $('pback').onclick=closeP;
 $('pcols').onclick=e=>{const b=e.target.closest('.opt'); if(!b) return;
   if(b.dataset.k=='k'){pk=+b.dataset.v;drawP();return;}
-  chords=PRE[+b.dataset.v][1].map(x=>mk(pk,x)); ov={}; closeP(); render();};
+  chords=PRE[+b.dataset.v][1].map(x=>mk(pk,x)); ov={};ovP={}; closeP(); render();};
 document.addEventListener('keydown',e=>{if(e.key=='Escape'){closeSheet();closeP();}});
+// ==PIANO==
+const IV={'':[0,4,7],'5':[0,7],'5(2)':[0,7],m:[0,3,7],'7':[0,4,7,10],m7:[0,3,7,10],maj7:[0,4,7,11],sus2:[0,2,7],sus4:[0,5,7]};
+const INV=['position fondamentale','1er renversement','2e renversement','3e renversement'];
+// Main droite : un renversement par candidat (note la plus grave entre do4 et si4) ; main gauche : la basse (do3 à si3)
+function pianoCands(root,q,bassPc){
+  const pcs=IV[q].map(i=>(root+i)%12), bm=48+((bassPc-48)%12+12)%12, out=[];
+  pcs.forEach((_,k)=>{
+    const ord=pcs.slice(k).concat(pcs.slice(0,k));
+    let p=60+((ord[0]-60)%12+12)%12; const n=[p];
+    for(let j=1;j<ord.length;j++){p+=((ord[j]-ord[j-1])%12+12)%12||12; n.push(p);}
+    if(q==='5') n.push(n[0]+12);
+    out.push({n,inv:k,bm});
+  });
+  return out;
+}
+function nodeCostP(c){const n=c.n, sp=n[n.length-1]-n[0], ctr=(n[0]+n[n.length-1])/2; return 0.25*sp+0.1*Math.abs(ctr-68)+(c.inv?0.4:0);}
+function transP(a,b){
+  const d=(x,y)=>x.reduce((s,v)=>s+Math.min(...y.map(w=>Math.abs(v-w))),0);
+  return 0.7*(d(a.n,b.n)+d(b.n,a.n))/2-0.8*a.n.filter(v=>b.n.includes(v)).length+0.06*Math.abs(a.bm-b.bm);
+}
+function buildP(tk,lvl,ovr){
+  return tk.map((t,i)=>{
+    const p=parse(t); if(!p||p.q===null) return {t,full:[],note:'accord non reconnu'};
+    let q=p.q; if(lvl=='easy'){if(q=='m7')q='m'; else if(q=='maj7')q='';}
+    const full=pianoCands(p.root,q,p.bass!==null?p.bass:p.root);
+    full.sort((a,b)=>nodeCostP(a)-nodeCostP(b)); full.forEach((c,j)=>c.id=j);
+    return {t,full,pool:ovr[i]!=null?[full[ovr[i]%full.length]]:full};
+  });
+}
+function modelP(ovr){
+  const runs=[]; tokens().forEach((t,i)=>{const l=runs[runs.length-1]; if(l&&l.t==t) l.n++; else runs.push({t,i,n:1});});
+  const rov={}; runs.forEach((r,k)=>{if(ovr[r.i]!=null) rov[k]=ovr[r.i];});
+  const items=buildP(runs.map(r=>r.t),$('lvl').value,rov);
+  return {runs,items,rov,...solve(items,nodeCostP,transP)};
+}
+function svgP(c){
+  const lo=48,hi=83,kw=10,wh=50,bh=31,bw=6.4, W=[0,2,4,5,7,9,11], rh=new Set(c.n);
+  const fill=(m,d)=>rh.has(m)?'var(--accent)':m==c.bm?'var(--bass)':d;
+  let s=`<svg viewBox="0 0 ${21*kw} ${wh+2}" role="img" aria-label="clavier" stroke="var(--keyline)" stroke-width=".8">`, wi=0, bl=[];
+  for(let m=lo;m<=hi;m++){ if(W.includes(m%12)){s+=`<rect x="${wi*kw}" y="1" width="${kw}" height="${wh}" fill="${fill(m,'#fdfdfd')}"/>`; wi++;} else bl.push([m,wi]); }
+  bl.forEach(([m,w])=>{s+=`<rect x="${w*kw-bw/2}" y="1" width="${bw}" height="${bh}" rx="1" fill="${fill(m,'var(--blackkey)')}"/>`;});
+  return s+'</svg>';
+}
+function renderP(){
+  const {runs,items,chosen}=modelP(ovP);
+  $('grid').innerHTML=items.map((it,i)=>{
+    const c=chosen[i], rep=runs[i].n>1?`${runs[i].n} mesures`:'';
+    if(!c) return `<div class="card pn" style="cursor:default"><b>${it.t}</b><small>${[rep,it.note].filter(Boolean).join(' · ')}</small></div>`;
+    const nm=m=>N[m%12];
+    return `<div class="card pn" tabindex="0" role="button" data-i="${i}" aria-label="${it.t} : changer de renversement"><b>${it.t}</b>${svgP(c)}<small>${[rep,INV[c.inv]].filter(Boolean).join(' · ')}</small><small>MG ${nm(c.bm)} · MD ${c.n.map(nm).join(' ')}</small></div>`;
+  }).join('');
+}
+// ==/PIANO==
+const slotsHTML=()=>{$('slots').innerHTML=chords.map((c,i)=>`<button class="chip" data-i="${i}">${c}</button>`).join('')+'<button class="chip add" id="add" aria-label="Ajouter un accord">+</button>';};
+function render(){ if(tab=='g') renderG(); else {slotsHTML(); renderP();} }
+const hintG=$('hint').innerHTML;
+const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que tu peux jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Clique sur un clavier pour changer de renversement. Le capo ne s'applique pas au piano.";
+function setTab(t){
+  tab=t; $('tabG').setAttribute('aria-selected',t=='g'); $('tabP').setAttribute('aria-selected',t=='p');
+  $('capoL').style.display=t=='g'?'':'none'; $('sugg').style.display='none';
+  $('hint').innerHTML=t=='g'?hintG:hintP; render();
+}
+$('tabG').onclick=()=>setTab('g'); $('tabP').onclick=()=>setTab('p');
+// ==IO==
+// Export : grille + réglages + doigtés retenus (guitare et piano). Import : on retrouve la grille et on ne
+// "épingle" que les choix qui diffèrent du calcul automatique, pour que la grille reste recalculable.
+function buildExport(){
+  const g=model(ov), p=modelP(ovP);
+  return {app:'diagrammes-accords',version:1,chords:chords.slice(),level:$('lvl').value,capo:+capoSel.value,
+    guitare:g.runs.map((r,k)=>{const c=g.chosen[k]; return {accord:r.t,mesure:r.i+1,mesures:r.n,...(c?{frettes:c.f,doigts:c.g.join(''),barre:c.b}:{})};}),
+    piano:p.runs.map((r,k)=>{const c=p.chosen[k]; return {accord:r.t,mesure:r.i+1,mesures:r.n,...(c?{main_gauche:c.bm,main_droite:c.n}:{})};})};
+}
+// On fixe des choix un à un jusqu'à retrouver la solution exportée, puis on retire ceux qui ne servent à rien :
+// la grille importée reste ainsi recalculable automatiquement autour des seuls choix manuels réels.
+function pinAll(list,mdl,pins,keyOf){
+  const skip=new Set(), find=(m,s)=>m.runs.findIndex(r=>r.i===s.mesure-1&&r.t===s.accord);
+  const firstBad=m=>{
+    for(const s of list){const k=find(m,s); if(k<0||skip.has(k)) continue; const c=m.chosen[k]; if(c&&keyOf(c)!==s.key) return [k,s];}
+    return null;
+  };
+  for(let it=0;it<=list.length;it++){
+    const m=mdl(pins), bad=firstBad(m); if(!bad) break;
+    const [k,s]=bad, c=m.items[k].full.find(c=>keyOf(c)===s.key);
+    if(c) pins[m.runs[k].i]=c.id; else skip.add(k);
+  }
+  Object.keys(pins).forEach(i=>{const v=pins[i]; delete pins[i]; if(firstBad(mdl(pins))) pins[i]=v;});
+}
+function applyImport(d){
+  if(!d||d.app!=='diagrammes-accords'||!Array.isArray(d.chords)) return 0;
+  const cs=d.chords.filter(x=>typeof x=='string'&&parse(x)); if(!cs.length) return 0;
+  chords=cs; ov={}; ovP={};
+  if(['full','easy'].includes(d.level)) $('lvl').value=d.level;
+  capoSel.value=String(Math.min(7,Math.max(0,Math.round(+d.capo||0))));
+  const mk=(arr,f)=>(Array.isArray(arr)?arr:[]).filter(s=>s&&f(s)).map(s=>({...s,key:f(s)}));
+  pinAll(mk(d.guitare,s=>Array.isArray(s.frettes)&&s.frettes.join()),model,ov,c=>c.f.join());
+  pinAll(mk(d.piano,s=>Array.isArray(s.main_droite)&&s.main_droite.join()+'|'+s.main_gauche),modelP,ovP,c=>c.n.join()+'|'+c.bm);
+  return cs.length;
+}
+// ==/IO==
+$('exp').onclick=()=>{
+  const blob=new Blob([JSON.stringify(buildExport(),null,1)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='grille-accords.json';
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  $('msg').textContent='Fichier « grille-accords.json » généré.';
+};
+$('impB').onclick=()=>$('imp').click();
+$('imp').onchange=async e=>{
+  const f=e.target.files[0]; e.target.value=''; if(!f) return;
+  let n=0; try{ n=applyImport(JSON.parse(await f.text())); }catch(_){}
+  $('msg').textContent=n?`Grille importée (${n} accords).`:'Fichier non reconnu.'; if(n) render();
+};
 render();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}</script>
