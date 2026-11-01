@@ -1,8 +1,9 @@
 // Mise en cache de l'appli pour un usage hors ligne.
 // Stratégie : on sert la copie en cache tout de suite et on la met à jour en arrière-plan
 // (les modifications apparaissent donc à la visite suivante). Changer CACHE force un nettoyage complet.
-const CACHE='accords-v7';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
+const VERSION='1.1.0';   // garder identique à APP_VERSION dans index.html
+const CACHE='accords-'+VERSION;
+const ASSETS=['./','./index.html','./theme.css','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });

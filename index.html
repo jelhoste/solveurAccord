@@ -15,24 +15,24 @@
 <style>
 :root{--bg:#f2f5f6;--panel:#fff;--ink:#16222b;--muted:#5d6b75;--line:#cfd8dd;--accent:#17696a;--accent-ink:#fff;--warn:#fff3d6;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10171c;--panel:#18222a;--ink:#e6edf1;--muted:#93a4af;--line:#2d3b45;--accent:#4fb8b2;--accent-ink:#082523;--warn:#3a3118}}
-:root[data-theme="dark"]{--bg:#10171c;--panel:#18222a;--ink:#e6edf1;--muted:#93a4af;--line:#2d3b45;--accent:#4fb8b2;--accent-ink:#082523;--warn:#3a3118}
+@media (prefers-color-scheme:dark){:root:where(:not([data-theme="light"])){--bg:#10171c;--panel:#18222a;--ink:#e6edf1;--muted:#93a4af;--line:#2d3b45;--accent:#4fb8b2;--accent-ink:#082523;--warn:#3a3118}}
+:root:where([data-theme="dark"]){--bg:#10171c;--panel:#18222a;--ink:#e6edf1;--muted:#93a4af;--line:#2d3b45;--accent:#4fb8b2;--accent-ink:#082523;--warn:#3a3118}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--font-body)}
 main{max-width:980px;margin:0 auto;padding:20px 16px 48px}
-h1{font:700 1.6rem/1.2 Georgia,"Times New Roman",serif;margin:0 0 4px}
+h1{font:700 1.6rem/1.2 var(--font-title);margin:0 0 4px}
 p.lead{color:var(--muted);margin:0 0 18px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
-textarea{width:100%;min-height:76px;font:600 1.1rem/1.4 ui-monospace,Consolas,monospace;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;resize:vertical}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+textarea{width:100%;min-height:76px;font:600 1.1rem/1.4 ui-monospace,Consolas,monospace;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:calc(var(--radius)*.8);padding:10px;resize:vertical}
 .row{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;align-items:end}
 label{display:flex;flex-direction:column;font-size:.85rem;color:var(--muted);gap:4px}
-select,button{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+select,button{font:inherit;padding:8px 10px;border-radius:calc(var(--radius)*.8);border:1px solid var(--line);background:var(--bg);color:var(--ink)}
 button{cursor:pointer;background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-#sugg{margin-top:14px;padding:10px 14px;border-radius:8px;background:var(--warn);display:none;gap:12px;align-items:center;flex-wrap:wrap}
+#sugg{margin-top:14px;padding:10px 14px;border-radius:calc(var(--radius)*.8);background:var(--warn);display:none;gap:12px;align-items:center;flex-wrap:wrap}
 #grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-.card{width:128px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 6px 6px;text-align:center;cursor:pointer;color:var(--ink)}
+.card{width:128px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:8px 6px 6px;text-align:center;cursor:pointer;color:var(--ink)}
 .card b{font-size:1.15rem;display:block}
 .card small{color:var(--muted);display:block;min-height:1.2em}
 .card svg{width:100%;height:auto;display:block}
@@ -43,7 +43,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 #sheet{position:fixed;inset:0;display:none;z-index:10}
 #sheet.open{display:block}
 .back{position:absolute;inset:0;background:rgba(0,0,0,.45)}
-.sheet{position:absolute;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px 16px 0 0;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px))}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-width:720px;margin:0 auto;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:calc(var(--radius)*1.6) calc(var(--radius)*1.6) 0 0;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px))}
 .sh{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .sh strong{flex:1}
 .cols{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:12px}
@@ -59,7 +59,9 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 .p2{grid-template-columns:1fr 1.7fr}
 .pre{text-align:left;padding:10px 12px}
 .pre small{display:block;font-weight:400;opacity:.8;margin-top:2px}
-:root{--bass:#d9731f;--keyline:#8a98a1;--blackkey:#1b242b}
+/* Tokens de thème (voir theme.css) : couleurs, clavier du piano, arrondis, polices */
+:root{--bass:#d9731f;--keyline:#8a98a1;--blackkey:#1b242b;--key:#fdfdfd;--radius:10px;
+--font-body:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;--font-title:Georgia,"Times New Roman",serif}
 .tabs{display:flex;gap:6px;margin-top:16px}
 .tabs button{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 20px}
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
@@ -67,13 +69,14 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 #ssheet{position:fixed;inset:0;display:none;z-index:10}
 #ssheet.open{display:block}
-.lk{width:100%;font:.8rem ui-monospace,Consolas,monospace;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.lk{width:100%;font:.8rem ui-monospace,Consolas,monospace;padding:8px;border:1px solid var(--line);border-radius:calc(var(--radius)*.8);background:var(--bg);color:var(--ink)}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:center}
-.acts a{display:inline-block;padding:8px 14px;border-radius:8px;border:1px solid var(--accent);color:var(--accent);font-weight:600;text-decoration:none}
+.acts a{display:inline-block;padding:8px 14px;border-radius:calc(var(--radius)*.8);border:1px solid var(--accent);color:var(--accent);font-weight:600;text-decoration:none}
 button:disabled{opacity:.4;cursor:default}
 .sh{flex-wrap:wrap}
 #prv,#nxt{padding:8px 12px}
 </style>
+<link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <main>
@@ -85,6 +88,8 @@ button:disabled{opacity:.4;cursor:default}
 <div class="row">
 <label>Niveau<select id="lvl"><option value="full">Complet (7, maj7, m7)</option><option value="easy">Simplifié (accords de base)</option></select></label>
 <label id="capoL">Capo<select id="capo"></select></label>
+<label id="strgL">Cordes<select id="strg"><option value="0">Uniformes</option><option value="1">Épaisseurs réalistes</option></select></label>
+<label>Thème<select id="thm"><option value="auto">Auto</option><option value="light">Clair</option><option value="dark">Sombre</option></select></label>
 
 </div>
 <div id="sugg"><span id="suggT"></span><button id="suggB">Appliquer</button></div>
@@ -92,6 +97,7 @@ button:disabled{opacity:.4;cursor:default}
 <div class="tabs" role="tablist"><button role="tab" id="tabG" aria-selected="true">Guitare</button><button role="tab" id="tabP" aria-selected="false">Piano</button></div>
 <div id="grid" aria-live="polite"></div>
 <p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Clique sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de ton choix. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
+<p class="hint" id="ver" style="margin-top:4px"></p>
 </main>
 <div id="ssheet"><div class="back" id="sback"></div>
 <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sT">
@@ -112,9 +118,62 @@ button:disabled{opacity:.4;cursor:default}
 <script>
 const DB={"C":[[[-1,3,2,0,1,0],"032010",0],[[3,3,5,5,5,3],"112341",[3,6,1]],[[-1,-1,5,5,5,8],"001114",[5,4,2]],[[8,10,10,9,8,8],"134211",[8,6,1]]],"Cm":[[[-1,3,1,0,1,3],"032014",0],[[3,3,5,5,4,3],"113421",[3,6,1]],[[8,6,5,5,-1,-1],"421100",[5,4,3]],[[8,10,10,8,8,8],"134111",[8,6,1]]],"Csus2":[[[-1,3,0,0,1,3],"030014",0],[[-1,3,0,0,3,3],"010023",0],[[3,3,5,5,3,3],"113411",[3,6,1]],[[8,-1,0,7,8,8],"200134",0]],"Csus4":[[[-1,3,3,0,1,1],"034011",[1,2,1]],[[3,3,5,5,6,3],"112341",[3,6,1]],[[8,8,-1,0,6,8],"230014",0],[[8,10,10,10,8,8],"123411",[8,6,1]]],"C7":[[[-1,3,2,3,1,0],"032410",0],[[3,3,5,3,5,3],"113141",[3,6,1]],[[-1,-1,5,5,5,6],"001112",[5,4,2]],[[8,10,8,9,8,8],"131211",[8,6,1]]],"Cmaj7":[[[3,3,2,0,0,0],"231000",0],[[3,3,5,4,5,3],"113241",[3,6,1]],[[-1,-1,5,5,5,7],"001114",[5,4,2]],[[-1,-1,10,12,12,12],"001333",[12,3,1]]],"Cm7":[[[-1,3,1,3,4,-1],"021340",0],[[3,3,5,3,4,3],"113121",[3,6,1]],[[-1,-1,5,5,4,6],"002314",0],[[8,10,8,8,8,8],"131111",[8,6,1]]],"C/E":[[[0,3,2,0,1,0],"032010",0],[[0,3,2,0,1,3],"032014",0],[[-1,7,5,5,8,8],"031144",[5,4,3]]],"C/F":[[[-1,-1,3,0,1,0],"003010",0],[[1,3,2,0,1,0],"143020",0],[[-1,-1,3,5,5,3],"001342",0]],"C/G":[[[3,3,2,0,1,0],"342010",0],[[3,3,5,5,5,3],"112341",[3,6,1]],[[3,3,2,5,5,-1],"231440",[5,3,2]]],"C#":[[[-1,4,3,1,2,1],"043121",[1,3,1]],[[4,4,6,6,6,4],"112341",[4,6,1]],[[9,8,6,6,6,9],"321114",[6,4,2]],[[9,11,11,10,9,9],"134211",[9,6,1]]],"C#m":[[[-1,4,2,1,2,-1],"042130",0],[[4,4,6,6,5,4],"113421",[4,6,1]],[[9,7,6,6,-1,9],"321104",[6,4,3]],[[9,11,11,9,9,9],"134111",[9,6,1]]],"C#sus2":[[[4,4,6,6,4,4],"113411",[4,6,1]],[[9,6,6,8,9,-1],"010023",[6,5,4]],[[9,11,11,-1,9,11],"123014",[9,6,2]],[[11,11,11,13,14,11],"111341",[11,6,1]]],"C#sus4":[[[-1,4,4,1,2,-1],"034120",0],[[4,4,6,6,7,4],"112341",[4,6,1]],[[9,-1,6,6,7,9],"230014",0],[[9,11,11,11,9,9],"123411",[9,6,1]]],"C#7":[[[-1,4,3,4,2,-1],"032410",0],[[-1,4,6,4,6,4],"013141",[4,5,1]],[[9,8,6,6,6,7],"431112",[6,4,2]],[[9,11,9,10,9,9],"131211",[9,6,1]]],"C#maj7":[[[-1,4,3,1,1,1],"043111",[1,3,1]],[[4,4,6,5,6,4],"113241",[4,6,1]],[[-1,-1,-1,6,6,8],"000113",[6,3,2]],[[9,-1,10,10,9,-1],"103420",0]],"C#m7":[[[-1,4,6,4,5,4],"013121",[4,5,1]],[[-1,-1,6,6,5,7],"002314",0],[[9,11,9,9,9,9],"141111",[9,6,1]],[[-1,-1,11,13,12,12],"001423",0]],"D":[[[-1,-1,0,2,3,2],"000132",0],[[2,5,4,2,3,2],"143121",[2,6,1]],[[5,5,7,7,7,5],"112341",[5,6,1]],[[10,12,12,11,10,10],"134211",[10,6,1]]],"Dm":[[[-1,-1,0,2,3,1],"000231",0],[[5,5,7,7,6,5],"113421",[5,6,1]],[[-1,8,7,7,6,-1],"042310",0],[[10,12,12,10,10,10],"134111",[10,6,1]]],"Dsus2":[[[-1,-1,0,2,3,0],"000230",0],[[-1,-1,2,2,3,5],"001124",[2,4,3]],[[5,5,7,7,5,5],"113411",[5,6,1]],[[-1,7,7,7,10,10],"011144",[7,5,3]]],"Dsus4":[[[-1,-1,0,2,3,3],"000123",0],[[-1,5,0,0,3,5],"030014",0],[[5,5,7,7,8,5],"112341",[5,6,1]],[[10,12,12,12,10,10],"123411",[10,6,1]]],"D7":[[[-1,-1,0,2,1,2],"000213",0],[[-1,5,4,5,3,-1],"032410",0],[[5,5,7,5,7,5],"113141",[5,6,1]],[[10,12,10,11,10,10],"131211",[10,6,1]]],"Dmaj7":[[[-1,-1,0,2,2,2],"000111",[2,3,1]],[[-1,5,4,2,2,2],"043111",[2,3,1]],[[5,5,7,6,7,5],"113241",[5,6,1]],[[-1,-1,7,7,7,9],"001114",[7,4,2]]],"Dm7":[[[-1,-1,0,2,1,1],"000312",0],[[5,5,7,5,6,5],"113121",[5,6,1]],[[-1,-1,7,7,6,8],"002314",0],[[10,12,10,10,10,10],"131111",[10,6,1]]],"D/F#":[[[2,0,0,2,3,2],"100243",0],[[2,5,4,2,3,2],"143121",[2,6,1]],[[-1,-1,4,2,3,5],"003124",0]],"D/A":[[[-1,0,0,2,3,2],"000132",0],[[5,5,7,7,7,5],"112341",[5,6,1]],[[5,5,4,7,7,-1],"231440",[7,3,2]]],"D/Bb":[[[-1,1,0,2,3,2],"010243",0],[[-1,1,4,2,3,2],"014232",[2,3,1]],[[6,5,7,7,7,-1],"213330",[7,4,2]]],"D/B":[[[-1,2,0,2,3,2],"010243",0],[[-1,2,4,2,3,2],"013121",[2,5,1]],[[-1,2,4,2,3,5],"013124",[2,5,3]]],"D/C":[[[-1,3,0,2,3,2],"030142",0],[[-1,3,4,2,3,2],"024131",[2,3,1]],[[8,5,7,7,7,-1],"413330",[7,4,2]]],"Eb":[[[-1,-1,1,3,4,3],"001243",0],[[-1,6,5,3,4,3],"043121",[3,3,1]],[[-1,6,8,8,8,6],"012341",[6,5,1]],[[-1,-1,8,8,8,11],"001114",[8,4,2]]],"Ebm":[[[-1,-1,1,3,4,2],"001342",0],[[-1,-1,4,3,4,2],"003241",0],[[6,6,8,8,7,6],"113421",[6,6,1]],[[11,13,13,11,11,11],"134111",[11,6,1]]],"Ebsus2":[[[1,1,1,3,4,1],"111341",[1,6,1]],[[6,6,8,8,6,6],"113411",[6,6,1]],[[11,8,8,10,11,-1],"311240",[8,5,4]],[[11,13,13,-1,11,13],"123014",[11,6,2]]],"Ebsus4":[[[-1,-1,1,3,4,4],"001234",0],[[6,6,8,8,9,6],"112341",[6,6,1]],[[-1,-1,8,8,9,-1],"001120",[8,4,3]],[[11,13,13,13,11,11],"123411",[11,6,1]]],"Eb7":[[[-1,-1,1,3,2,3],"001324",0],[[-1,6,8,6,8,6],"013141",[6,5,1]],[[-1,-1,8,8,8,9],"001112",[8,4,2]],[[11,13,11,12,11,11],"131211",[11,6,1]]],"Ebmaj7":[[[-1,1,1,3,3,3],"011333",[1,5,4]],[[-1,6,5,3,3,3],"043111",[3,3,1]],[[6,6,8,7,8,6],"113241",[6,6,1]],[[-1,-1,8,8,8,10],"001114",[8,4,2]]],"Ebm7":[[[-1,-1,1,3,2,2],"001423",0],[[6,6,8,6,7,6],"113121",[6,6,1]],[[-1,-1,8,8,7,9],"002314",0],[[11,13,11,11,11,11],"141111",[11,6,1]]],"E":[[[0,2,2,1,0,0],"023100",0],[[-1,-1,2,4,5,4],"001243",0],[[4,7,6,4,5,4],"143121",[4,6,1]],[[7,7,9,9,9,7],"112341",[7,6,1]]],"Em":[[[0,2,2,0,0,0],"023000",0],[[0,2,2,4,5,3],"011342",[2,5,4]],[[7,7,9,9,8,7],"113421",[7,6,1]],[[12,10,9,9,-1,-1],"431200",0]],"Esus2":[[[2,2,2,4,5,2],"111341",[2,6,1]],[[0,7,9,9,7,7],"013411",[7,5,1]],[[0,9,9,9,0,0],"012300",0],[[12,14,14,-1,12,14],"134014",[12,6,2]]],"Esus4":[[[0,2,2,2,0,0],"023400",0],[[0,2,2,4,5,5],"011234",[2,5,4]],[[7,7,9,9,10,7],"112341",[7,6,1]],[[-1,-1,9,9,10,0],"001120",[9,4,3]]],"E7":[[[0,2,0,1,0,0],"020100",0],[[-1,7,6,7,5,-1],"032410",0],[[7,7,9,7,9,7],"113141",[7,6,1]],[[-1,-1,9,9,9,10],"001112",[9,4,2]]],"Emaj7":[[[0,2,1,1,0,0],"031200",0],[[-1,-1,2,4,4,4],"001333",[4,3,1]],[[-1,7,6,4,4,4],"043111",[4,3,1]],[[7,7,9,8,9,7],"113241",[7,6,1]]],"Em7":[[[0,2,2,0,3,0],"023040",0],[[0,2,0,0,0,0],"020000",0],[[0,2,2,4,3,3],"011423",[2,5,4]],[[7,7,9,7,8,7],"113121",[7,6,1]],[[-1,-1,9,9,8,10],"002314",0]],"E/B":[[[-1,2,2,1,0,0],"023100",0],[[-1,2,2,4,5,4],"011343",[2,5,4]],[[7,7,9,9,9,7],"112341",[7,6,1]]],"Em/B":[[[-1,2,2,0,0,0],"012000",0],[[-1,2,2,0,0,3],"012003",0],[[-1,2,2,4,5,3],"011342",0]],"E/C#":[[[-1,4,6,4,5,4],"013121",[4,5,1]],[[-1,4,6,4,5,7],"013124",[4,5,3]],[[9,11,9,9,12,12],"131144",[9,6,3]]],"Em/C#":[[[-1,4,2,0,0,0],"031000",0],[[-1,4,5,4,5,7],"012134",0],[[9,10,9,12,12,12],"121444",[9,6,4]]],"E/D":[[[-1,-1,0,1,0,0],"000100",0],[[-1,5,6,4,5,4],"024131",[4,3,1]],[[-1,5,2,4,5,4],"031242",[4,3,1]]],"Em/D":[[[-1,-1,0,0,0,0],"000000",0],[[-1,5,5,4,5,-1],"023140",0],[[-1,-1,12,12,12,12],"001111",[12,4,1]]],"E/D#":[[[-1,-1,1,1,0,0],"001200",0],[[-1,6,6,4,5,4],"034121",[4,3,1]],[[11,11,9,9,12,12],"231144",[9,4,3]]],"Em/D#":[[[-1,-1,1,0,0,0],"001000",0],[[-1,6,5,4,5,-1],"042130",0],[[-1,6,9,9,8,-1],"013420",0]],"E/F":[[[1,2,2,1,0,0],"134200",0],[[-1,-1,3,1,0,0],"003100",0],[[-1,-1,3,4,5,4],"001243",0]],"E/F#":[[[2,2,2,1,0,0],"234100",0],[[-1,-1,4,4,5,4],"001121",[4,4,1]],[[2,2,2,4,5,4],"111343",[2,6,4]]],"E/G":[[[3,2,2,1,0,0],"423100",0],[[3,2,2,4,5,4],"211343",[2,5,4]],[[-1,-1,5,4,5,4],"003142",0]],"E/G#":[[[-1,-1,-1,1,0,0],"000100",0],[[4,2,2,1,0,0],"423100",0],[[4,7,6,4,5,4],"143121",[4,6,1]],[[4,2,2,4,5,-1],"211340",[2,5,4]]],"Em/F":[[[-1,-1,3,0,0,0],"001000",0],[[1,2,2,0,0,0],"123000",0],[[1,2,2,0,0,3],"123004",0]],"Em/F#":[[[2,2,2,0,0,0],"123000",0],[[2,2,2,0,0,3],"123004",0],[[2,2,2,4,5,3],"111342",[2,6,4]]],"Em/G":[[[3,2,2,0,0,0],"312000",0],[[3,2,2,0,0,3],"312004",0],[[3,2,2,4,5,0],"211340",[2,5,4]]],"Em/G#":[[[4,2,2,0,0,0],"412000",0],[[4,7,5,4,5,-1],"142130",[4,6,3]],[[-1,-1,6,4,5,3],"004231",0]],"F":[[[1,3,3,2,1,1],"134211",[1,6,1]],[[-1,3,3,5,6,5],"011243",[3,5,4]],[[5,8,7,5,6,5],"143121",[5,6,1]],[[8,8,10,10,10,8],"112341",[8,6,1]]],"Fm":[[[1,3,3,1,1,1],"134111",[1,6,1]],[[-1,-1,3,5,6,4],"001342",0],[[8,8,10,10,9,8],"113421",[8,6,1]],[[13,11,10,10,-1,-1],"421100",[10,4,3]]],"Fsus2":[[[1,3,3,-1,1,3],"123014",[1,6,2]],[[3,3,3,5,6,3],"111341",[3,6,1]],[[8,8,10,10,8,8],"113411",[8,6,1]],[[13,10,10,12,13,-1],"311240",[10,5,4]]],"Fsus4":[[[1,3,3,3,1,1],"123411",[1,6,1]],[[-1,-1,3,5,6,6],"001234",0],[[8,8,10,10,11,8],"112341",[8,6,1]],[[-1,-1,10,10,11,-1],"001120",[10,4,3]]],"F7":[[[1,3,1,2,1,1],"131211",[1,6,1]],[[-1,3,3,5,4,5],"011324",[3,5,4]],[[8,8,10,8,10,8],"113141",[8,6,1]],[[-1,-1,10,10,10,11],"001112",[10,4,2]]],"Fmaj7":[[[-1,-1,3,2,1,0],"003210",0],[[1,3,2,2,1,1],"142311",[1,6,1]],[[-1,3,3,5,5,5],"011333",[3,5,4]],[[8,8,10,9,10,8],"113241",[8,6,1]]],"Fm7":[[[1,3,1,1,1,1],"131111",[1,6,1]],[[-1,-1,3,5,4,4],"001423",0],[[8,8,10,8,9,8],"113121",[8,6,1]],[[-1,-1,10,10,9,11],"002314",0]],"F/C":[[[-1,3,3,2,1,1],"034211",[1,2,1]],[[-1,3,3,5,6,5],"011343",[3,5,4]],[[8,8,10,10,10,8],"112341",[8,6,1]]],"F/D":[[[-1,-1,0,2,1,1],"000211",[1,2,1]],[[-1,5,7,5,6,5],"013121",[5,5,1]],[[-1,5,7,5,6,8],"013124",0]],"F/D#":[[[-1,-1,1,2,1,1],"001211",[1,4,1]],[[-1,6,7,5,6,5],"024131",[5,3,1]],[[-1,6,3,5,6,5],"031242",[5,3,1]]],"F/E":[[[0,0,3,2,1,1],"003211",[1,2,1]],[[-1,-1,2,2,1,1],"002311",[1,2,1]],[[0,3,3,2,1,1],"034211",[1,2,1]]],"F/G":[[[3,0,3,2,1,1],"304211",[1,2,1]],[[3,3,3,2,-1,-1],"234100",0],[[3,3,3,5,6,5],"111343",[3,6,4]]],"F/A":[[[-1,0,3,2,1,1],"003211",[1,2,1]],[[5,3,3,2,-1,-1],"423100",0],[[5,3,3,5,6,0],"211340",[3,5,4]]],"Fm/C":[[[-1,3,3,1,1,1],"034111",[1,3,1]],[[-1,3,3,1,1,4],"023114",[1,3,2]],[[8,8,10,10,9,8],"113421",[8,6,1]]],"F#":[[[2,4,4,3,2,2],"134211",[2,6,1]],[[-1,4,4,6,7,6],"011243",[4,5,4]],[[6,9,8,6,7,6],"143121",[6,6,1]],[[9,9,11,11,11,9],"112341",[9,6,1]]],"F#m":[[[2,4,4,2,2,2],"134111",[2,6,1]],[[-1,4,4,6,7,5],"011342",[4,5,4]],[[-1,-1,7,6,7,5],"003241",0],[[9,9,11,11,10,9],"113421",[9,6,1]]],"F#sus2":[[[2,-1,-1,1,2,2],"200134",0],[[4,4,4,6,7,4],"111341",[4,6,1]],[[9,9,11,11,9,9],"113411",[9,6,1]],[[14,11,11,13,14,-1],"311240",[11,5,4]]],"F#sus4":[[[2,4,4,4,2,2],"123411",[2,6,1]],[[-1,4,4,6,7,7],"011234",[4,5,4]],[[9,9,11,11,12,9],"112341",[9,6,1]],[[-1,-1,11,11,12,14],"001124",[11,4,3]]],"F#7":[[[2,4,2,3,2,2],"131211",[2,6,1]],[[-1,4,4,6,5,6],"011324",[4,5,4]],[[-1,9,8,9,7,-1],"032410",0],[[9,9,11,9,11,9],"113141",[9,6,1]]],"F#maj7":[[[2,4,3,3,2,2],"142311",[2,6,1]],[[-1,4,4,6,6,6],"011333",[4,5,4]],[[-1,9,8,6,6,6],"043111",[6,3,1]],[[9,9,11,10,11,9],"113241",[9,6,1]]],"F#m7":[[[2,4,2,2,2,2],"131111",[2,6,1]],[[-1,-1,4,6,5,5],"001423",0],[[9,9,11,9,10,9],"113121",[9,6,1]],[[-1,-1,11,11,10,12],"002314",0]],"G":[[[3,2,0,0,0,3],"210003",0],[[3,5,5,4,3,3],"134211",[3,6,1]],[[-1,5,5,7,8,7],"011243",[5,5,4]],[[7,10,9,7,8,7],"143121",[7,6,1]]],"Gm":[[[3,1,0,0,3,3],"210034",0],[[3,5,5,3,3,3],"134111",[3,6,1]],[[-1,-1,5,7,8,6],"001342",0],[[10,10,12,12,11,10],"113421",[10,6,1]]],"Gsus2":[[[3,0,0,0,3,3],"100023",0],[[5,5,5,7,8,5],"111341",[5,6,1]],[[-1,10,7,7,8,10],"031124",[7,4,3]],[[10,10,12,12,10,10],"113411",[10,6,1]]],"Gsus4":[[[3,3,0,0,1,3],"230014",0],[[3,5,5,5,3,3],"123411",[3,6,1]],[[-1,5,5,7,8,8],"011344",[5,5,4]],[[10,10,12,12,13,10],"112341",[10,6,1]]],"G7":[[[3,2,0,0,0,1],"320001",0],[[3,5,3,4,3,3],"131211",[3,6,1]],[[-1,5,5,7,6,7],"011324",[5,5,4]],[[10,10,12,10,12,10],"113141",[10,6,1]]],"Gmaj7":[[[3,2,0,0,0,2],"320001",0],[[3,5,4,4,3,3],"142311",[3,6,1]],[[-1,5,5,7,7,7],"011333",[5,5,4]],[[-1,10,12,11,12,10],"013241",[10,5,1]]],"Gm7":[[[3,5,3,3,3,3],"131111",[3,6,1]],[[-1,5,5,7,6,6],"011423",[5,5,4]],[[-1,10,8,10,8,10],"021314",[8,4,2]],[[10,10,12,10,11,10],"113121",[10,6,1]]],"G/F#":[[[2,2,0,0,0,3],"120003",0],[[2,2,0,0,3,3],"120034",0],[[-1,-1,4,4,3,3],"002311",[3,2,1]]],"G/B":[[[-1,2,0,0,3,3],"010023",0],[[-1,2,0,0,0,3],"010002",0],[[-1,2,5,4,3,3],"014322",[3,2,1]]],"G/D":[[[-1,-1,0,0,0,3],"000001",0],[[-1,5,5,4,3,3],"034211",[3,2,1]],[[-1,5,5,7,8,7],"011343",[5,5,4]]],"G/E":[[[0,2,0,0,3,3],"010023",0],[[0,2,0,0,0,3],"010002",0],[[-1,-1,2,4,3,3],"001423",0]],"G/F":[[[1,2,0,0,3,3],"120034",0],[[1,2,0,0,0,3],"120003",0],[[-1,-1,3,4,3,3],"001211",0]],"Ab":[[[4,3,1,1,1,-1],"321110",[1,4,2]],[[4,6,6,5,4,4],"134211",[4,6,1]],[[-1,6,6,8,9,8],"011243",[6,5,4]],[[8,11,10,8,9,8],"143121",[8,6,1]]],"Abm":[[[4,6,6,4,4,4],"134111",[4,6,1]],[[-1,-1,6,8,9,7],"001342",0],[[-1,-1,9,8,9,7],"003241",0],[[11,11,13,13,12,11],"113421",[11,6,1]]],"Absus2":[[[4,-1,-1,3,4,4],"200134",0],[[4,6,6,-1,4,6],"123014",[4,6,2]],[[6,6,6,8,9,6],"111341",[6,6,1]],[[11,11,13,13,11,11],"113411",[11,6,1]]],"Absus4":[[[-1,-1,1,1,2,4],"001124",[1,4,3]],[[4,6,6,6,4,4],"123411",[4,6,1]],[[-1,6,6,8,9,9],"011234",[6,5,4]],[[11,11,13,13,14,11],"112341",[11,6,1]]],"Ab7":[[[-1,-1,1,1,1,2],"001112",[1,4,2]],[[4,6,4,5,4,4],"131211",[4,6,1]],[[-1,6,6,8,7,8],"011324",[6,5,4]],[[11,11,13,11,13,11],"113141",[11,6,1]]],"Abmaj7":[[[4,6,5,5,4,4],"142311",[4,6,1]],[[-1,6,6,8,8,8],"011333",[6,5,4]],[[-1,11,10,12,9,-1],"032410",0],[[11,11,13,12,13,11],"113241",[11,6,1]]],"Abm7":[[[4,6,4,4,4,4],"131111",[4,6,1]],[[-1,6,6,8,7,7],"011423",[6,5,4]],[[-1,11,9,11,9,-1],"021310",[9,4,2]],[[11,11,13,11,12,11],"113121",[11,6,1]]],"A":[[[-1,0,2,2,2,0],"001230",0],[[-1,0,2,2,2,5],"001114",[2,4,2]],[[5,7,7,6,5,5],"134211",[5,6,1]],[[-1,0,7,9,10,9],"001243",0]],"Am":[[[-1,0,2,2,1,0],"002310",0],[[-1,0,2,5,5,5],"001444",[5,3,1]],[[5,7,7,5,5,5],"134111",[5,6,1]],[[-1,0,7,9,10,8],"001342",0]],"Asus2":[[[-1,0,2,2,0,0],"002300",0],[[-1,0,2,4,0,0],"001400",0],[[7,7,7,9,10,7],"111341",[7,6,1]],[[-1,0,9,9,0,0],"001200",0]],"Asus4":[[[-1,0,2,2,3,0],"001230",0],[[-1,0,0,-1,3,0],"000010",0],[[5,7,7,7,5,5],"133411",[5,6,1]],[[-1,7,7,9,10,10],"011234",[7,5,4]]],"A7":[[[-1,0,2,0,2,0],"002030",0],[[-1,0,2,2,2,3],"001112",[2,4,2]],[[5,7,5,6,5,5],"131211",[5,6,1]],[[-1,0,7,9,8,9],"001324",0]],"Amaj7":[[[-1,0,2,1,2,0],"002130",0],[[-1,0,2,2,2,4],"001114",[2,4,2]],[[5,7,6,6,5,5],"142311",[5,6,1]],[[-1,0,7,9,9,9],"001333",[9,3,1]]],"Am7":[[[-1,0,2,0,1,0],"002010",0],[[-1,0,2,2,1,3],"002314",0],[[5,7,5,5,5,5],"131111",[5,6,1]],[[-1,7,7,9,8,8],"011423",[7,5,4]]],"A/C#":[[[-1,4,2,2,5,5],"031144",[2,4,3]],[[-1,4,2,2,2,5],"031114",[2,4,2]],[[-1,4,7,6,5,5],"014322",[5,2,1]]],"A/E":[[[0,0,2,2,2,0],"001230",0],[[-1,7,7,6,5,5],"034211",[5,2,1]],[[-1,-1,2,2,2,5],"001114",[2,4,2]]],"A/F":[[[1,0,2,2,2,0],"102340",0],[[-1,-1,3,2,2,0],"003120",0],[[1,4,2,2,2,-1],"142220",[2,4,2]]],"A/F#":[[[2,0,2,2,2,0],"102340",0],[[2,4,2,2,5,5],"131144",[2,6,3]],[[2,4,2,2,2,5],"131114",[2,6,2]]],"A/G":[[[3,0,2,2,2,0],"401230",0],[[-1,-1,5,6,5,5],"001211",[5,4,1]],[[3,4,2,2,5,5],"231144",0]],"A/G#":[[[4,4,2,2,5,5],"231144",[2,4,3]],[[4,4,2,2,2,5],"231114",[2,4,2]],[[-1,-1,6,6,5,5],"002311",[5,2,1]]],"Am/C":[[[-1,3,2,2,1,0],"042310",0],[[-1,3,2,5,5,5],"021444",[5,3,1]],[[-1,3,2,2,5,5],"021144",[2,4,3]]],"Am/E":[[[0,0,2,2,1,0],"002310",0],[[0,3,2,2,1,0],"042310",0],[[-1,7,7,5,5,5],"034111",[5,3,1]]],"Am/F":[[[1,0,2,2,1,0],"103420",0],[[-1,-1,3,2,1,0],"003210",0],[[1,3,2,2,1,-1],"142310",[1,6,2]]],"Am/F#":[[[2,0,2,2,1,0],"203410",0],[[-1,-1,4,5,5,5],"001234",0],[[2,3,2,5,5,5],"121444",[2,6,4]]],"Am/G":[[[-1,-1,5,5,5,5],"001111",[5,4,1]],[[3,0,2,2,1,0],"402310",0],[[3,3,2,5,5,5],"231444",[5,3,1]]],"Am/G#":[[[-1,-1,4,5,5,5],"002111",[5,3,1]],[[4,3,2,5,5,5],"321444",[5,3,1]],[[4,3,2,2,5,5],"321144",[2,4,3]]],"Bb":[[[-1,1,3,3,3,1],"012341",[1,5,1]],[[6,5,3,3,3,-1],"431110",[3,4,2]],[[6,8,8,7,6,6],"134211",[6,6,1]],[[-1,8,8,10,11,10],"011243",[8,5,4]]],"Bbm":[[[-1,1,3,3,2,1],"013421",[1,5,1]],[[6,8,8,6,6,6],"134111",[6,6,1]],[[-1,-1,8,6,6,6],"003111",[6,3,1]],[[-1,-1,8,10,11,9],"001342",0]],"Bbsus2":[[[1,1,3,3,1,1],"113411",[1,6,1]],[[6,3,3,5,6,-1],"311240",[3,5,4]],[[8,8,8,10,11,8],"111341",[8,6,1]],[[-1,13,10,10,11,13],"031124",[10,4,3]]],"Bbsus4":[[[-1,1,3,3,4,1],"012341",[1,5,1]],[[-1,-1,3,3,4,6],"001124",[3,4,3]],[[6,8,8,8,6,6],"133311",[6,6,1]],[[-1,8,8,10,11,11],"011234",[8,5,4]]],"Bb7":[[[-1,1,3,1,3,1],"013141",[1,5,1]],[[6,8,6,7,6,6],"131211",[6,6,1]],[[-1,8,8,10,9,10],"011324",[8,5,4]],[[-1,13,12,13,11,-1],"032410",0]],"Bbmaj7":[[[-1,1,3,2,3,1],"013241",[1,5,1]],[[-1,-1,3,3,3,5],"001114",[3,4,2]],[[6,8,7,7,6,6],"142311",[6,6,1]],[[-1,8,8,10,10,10],"011333",[8,5,4]]],"Bbm7":[[[-1,1,3,1,2,1],"013121",[1,5,1]],[[-1,-1,3,3,2,4],"002314",0],[[6,8,6,6,6,6],"131111",[6,6,1]],[[-1,8,8,10,9,9],"011423",[8,5,4]]],"B":[[[2,2,4,4,4,2],"112341",[2,6,1]],[[-1,-1,4,4,4,7],"001114",[4,4,2]],[[7,9,9,8,7,7],"134211",[7,6,1]],[[-1,9,9,11,12,11],"011243",[9,5,4]]],"Bm":[[[2,2,4,4,3,2],"113421",[2,6,1]],[[7,9,9,7,7,7],"134111",[7,6,1]],[[-1,-1,9,11,12,10],"001342",0],[[-1,-1,12,11,12,10],"003241",0]],"Bsus2":[[[2,2,4,4,2,2],"113411",[2,6,1]],[[7,-1,-1,6,7,7],"200134",0],[[9,9,9,11,12,9],"111341",[9,6,1]],[[-1,14,11,11,12,14],"031124",[11,4,3]]],"Bsus4":[[[2,2,4,4,5,2],"112341",[2,6,1]],[[-1,-1,4,4,5,7],"001124",[4,4,3]],[[7,9,9,9,7,7],"123411",[7,6,1]],[[-1,9,9,11,12,12],"011344",[9,5,4]]],"B7":[[[-1,2,1,2,0,2],"021304",0],[[2,2,4,2,4,2],"113141",[2,6,1]],[[-1,-1,4,4,4,5],"001112",[4,4,2]],[[7,9,7,8,7,7],"131211",[7,6,1]]],"Bmaj7":[[[2,2,4,3,4,2],"113241",[2,6,1]],[[-1,-1,4,4,4,6],"001114",[4,4,2]],[[7,9,8,8,7,7],"142311",[7,6,1]],[[-1,9,9,11,11,11],"011333",[9,5,4]]],"Bm7":[[[2,2,4,2,3,2],"113121",[2,6,1]],[[-1,-1,4,4,3,5],"002314",0],[[7,9,7,7,7,7],"131111",[7,6,1]],[[-1,9,9,11,10,10],"011423",[9,5,4]]]};
 const BN=['C','C#','D','D#','E','F','F#','G','G#','A','Bb','B'];
+// ==CHORDS==
+// Bibliothèque de symboles d'accords (nom -> racine / type / basse). Si sa grammaire évolue, incrémenter CHORD_LIB_VERSION
+// et ne JAMAIS renommer les identifiants de QUALITY_ID : ce sont eux qui sont écrits dans les fichiers.
+const CHORD_LIB_VERSION=1;
 const N=['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
 const PC={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 const QMAP={'':'',m:'m',min:'m','-':'m','7':'7',m7:'m7',min7:'m7',maj7:'maj7',M7:'maj7','Δ':'maj7',sus2:'sus2',sus4:'sus4',sus:'sus4','5':'5','5(3)':'5','5(2)':'5(2)'};
+function parse(t){
+  const m=t.match(/^([A-G])([#b]?)([^\/]*)(?:\/([A-G])([#b]?))?$/); if(!m) return null;
+  const sm=(a,b)=>(PC[a]+(b=='#'?1:b=='b'?-1:0)+12)%12, q=QMAP[m[3]];
+  return {root:sm(m[1],m[2]),q:q===undefined?null:q,bass:m[4]?sm(m[4],m[5]):null};
+}
+// Vocabulaire canonique des types d'accords : identifiants STABLES, indépendants de la façon dont on écrit le symbole.
+const QUALITY_ID={'':'major',m:'minor','7':'7',m7:'m7',maj7:'maj7',sus2:'sus2',sus4:'sus4','5':'5','5(2)':'5(2)'};
+const ID_QUALITY=Object.fromEntries(Object.entries(QUALITY_ID).map(([q,id])=>[id,q]));
+// symbole -> [racine 0-11 (do=0), identifiant de type, basse 0-11 ou null] ; null si non reconnu
+function chordToStructure(sym){
+  const p=typeof sym==='string'?parse(sym):null;
+  if(!p||p.q===null||QUALITY_ID[p.q]===undefined) return null;
+  return [p.root,QUALITY_ID[p.q],p.bass!==null&&p.bass!==p.root?p.bass:null];
+}
+// forme structurée -> symbole canonique ; null si invalide ou inconnue de cette version
+function structureToChord(s){
+  if(!Array.isArray(s)||!Number.isInteger(s[0])||s[0]<0||s[0]>11||typeof s[1]!=='string'||!Object.hasOwn(ID_QUALITY,s[1])) return null;
+  const b=s[2]; if(b!=null&&!(Number.isInteger(b)&&b>=0&&b<=11)) return null;
+  return N[s[0]]+ID_QUALITY[s[1]]+(b!=null&&b!==s[0]?'/'+N[b]:'');
+}
+// ==/CHORDS==
+// ==COMPAT==
+// Versions. APP_VERSION : l'appli (semver ; garder identique à VERSION dans sw.js). SCHEMA_VERSION : format des fichiers d'export
+// et des liens de partage (entier, +1 à chaque changement incompatible ; les ajouts de champs ne le changent pas).
+const APP_VERSION='1.1.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
+// MIGRATIONS[n] transforme un document de format n en format n+1. Ne jamais modifier une migration déjà publiée : en ajouter une.
+const MIGRATIONS={
+  1:d=>({...d,schema:2,structure:(Array.isArray(d.chords)?d.chords:[]).map(chordToStructure)})   // v1 : symboles seuls
+};
+// Vérifie et met à niveau un document importé. -> {doc,warnings} ou {error}
+function normalizeImport(d){
+  if(!d||typeof d!=='object'||d.app!=='diagrammes-accords'||!Array.isArray(d.chords)) return {error:'format'};
+  let s=Number.isInteger(d.schema)?d.schema:(Number.isInteger(d.version)?d.version:1);   // anciens fichiers : champ « version »
+  if(s<1) return {error:'format'};
+  const warnings=[];
+  if(s>SCHEMA_VERSION) warnings.push(`Fichier créé par une version plus récente de l'appli (format ${s}) : seules les informations connues sont reprises.`);
+  let doc=d; while(s<SCHEMA_VERSION){ doc=MIGRATIONS[s](doc); s++; }
+  return {doc,warnings};
+}
+// Accords du document : la forme structurée (stable) prime ; sinon le symbole tel qu'il a été écrit.
+function resolveChords(doc){
+  const chords=[], bad=[];
+  doc.chords.forEach((sym,i)=>{
+    const c=structureToChord(doc.structure&&doc.structure[i]);
+    if(c) chords.push(c); else if(typeof sym==='string'&&parse(sym)) chords.push(sym); else bad.push(i+1);
+  });
+  return {chords,bad};
+}
+// ==/COMPAT==
 // Doigtés ouverts : [frets, doigts, barré [case,corde de,corde à]]
 const OPEN={
 C:[['x32010','032010']],C7:[['x32310','032410']],Cmaj7:[['x32000','032000']],
@@ -134,11 +193,6 @@ const BARRE=[
 ['maj7','A',r=>[-1,r,r+2,r+1,r+2,r],'013241',5]
 ];
 const toF=s=>[...s].map(c=>c=='x'?-1:+c);
-function parse(t){
-  const m=t.match(/^([A-G])([#b]?)([^\/]*)(?:\/([A-G])([#b]?))?$/); if(!m) return null;
-  const sm=(a,b)=>(PC[a]+(b=='#'?1:b=='b'?-1:0)+12)%12, q=QMAP[m[3]];
-  return {root:sm(m[1],m[2]),q:q===undefined?null:q,bass:m[4]?sm(m[4],m[5]):null};
-}
 function candidates(root,q,bass){
   const out=[], seen=new Set(), name=N[root]+q, key=bass==null?name:name+'/'+BN[bass];
   const add=(f,g,b,base)=>{const k=f.join();if(seen.has(k))return;seen.add(k);out.push({f,g:[...g].map(Number),b,base,shape:name});};
@@ -210,12 +264,13 @@ function solve(items,NC,TR){
   return {chosen,cost:r.cost};
 }
 // Dessin SVG
+const STR_W=[2.2,1.8,1.4,1.05,0.8,0.6]; // épaisseur relative des 6 cordes, de la plus grave (mi) à la plus aiguë (mi)
 function svg(c){
   const X=i=>20+i*11, top=24, fh=15, rows=5;
   const fr=c.f.filter(x=>x>0), mx=fr.length?Math.max(...fr):0, mn=fr.length?Math.min(...fr):1;
   const start=mx<=5?1:mn;
   let s=`<svg viewBox="0 0 100 106" role="img" aria-label="diagramme" fill="none" stroke="currentColor" stroke-width="1">`;
-  for(let i=0;i<6;i++) s+=`<line x1="${X(i)}" y1="${top}" x2="${X(i)}" y2="${top+rows*fh}"/>`;
+  for(let i=0;i<6;i++) s+=`<line x1="${X(i)}" y1="${top}" x2="${X(i)}" y2="${top+rows*fh}"${thick?` stroke-width="${STR_W[i]}"`:''}/>`;
   for(let j=0;j<=rows;j++) s+=`<line x1="${X(0)}" y1="${top+j*fh}" x2="${X(5)}" y2="${top+j*fh}" ${j==0&&start==1?'stroke-width="3"':''}/>`;
   if(start>1) s+=`<text x="${X(5)+6}" y="${top+fh*0.7}" font-size="9" fill="currentColor" stroke="none">${start}</text>`;
   c.f.forEach((f,i)=>{ if(f<0) s+=`<text x="${X(i)}" y="16" font-size="10" text-anchor="middle" fill="currentColor" stroke="none">×</text>`;
@@ -234,7 +289,7 @@ function svg(c){
 // Interface
 const $=id=>document.getElementById(id);
 const capoSel=$('capo'); for(let k=0;k<=7;k++) capoSel.add(new Option(k?`Case ${k}`:'Sans capo',k));
-let ov={}, ovP={}, tab='g';
+let ov={}, ovP={}, tab='g', thick=false;
 let chords=['Am','F','C','G7','Am','F','C','E7'];
 function tokens(){return chords.slice();}
 // Regroupe les accords identiques consécutifs : un seul diagramme par série
@@ -375,7 +430,7 @@ function svgP(c){
   const lo=48,hi=83,kw=10,wh=50,bh=31,bw=6.4, W=[0,2,4,5,7,9,11], rh=new Set(c.n);
   const fill=(m,d)=>rh.has(m)?'var(--accent)':m==c.bm?'var(--bass)':d;
   let s=`<svg viewBox="0 0 ${21*kw} ${wh+2}" role="img" aria-label="clavier" stroke="var(--keyline)" stroke-width=".8">`, wi=0, bl=[];
-  for(let m=lo;m<=hi;m++){ if(W.includes(m%12)){s+=`<rect x="${wi*kw}" y="1" width="${kw}" height="${wh}" fill="${fill(m,'#fdfdfd')}"/>`; wi++;} else bl.push([m,wi]); }
+  for(let m=lo;m<=hi;m++){ if(W.includes(m%12)){s+=`<rect x="${wi*kw}" y="1" width="${kw}" height="${wh}" fill="${fill(m,'var(--key)')}"/>`; wi++;} else bl.push([m,wi]); }
   bl.forEach(([m,w])=>{s+=`<rect x="${w*kw-bw/2}" y="1" width="${bw}" height="${bh}" rx="1" fill="${fill(m,'var(--blackkey)')}"/>`;});
   return s+'</svg>';
 }
@@ -395,7 +450,7 @@ const hintG=$('hint').innerHTML;
 const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que tu peux jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Clique sur un clavier pour changer de renversement. Le capo ne s'applique pas au piano.";
 function setTab(t){
   tab=t; $('tabG').setAttribute('aria-selected',t=='g'); $('tabP').setAttribute('aria-selected',t=='p');
-  $('capoL').style.display=t=='g'?'':'none'; $('sugg').style.display='none';
+  $('capoL').style.display=$('strgL').style.display=t=='g'?'':'none'; $('sugg').style.display='none';
   $('hint').innerHTML=t=='g'?hintG:hintP; render();
 }
 $('tabG').onclick=()=>setTab('g'); $('tabP').onclick=()=>setTab('p');
@@ -404,35 +459,52 @@ $('tabG').onclick=()=>setTab('g'); $('tabP').onclick=()=>setTab('p');
 // "épingle" que les choix qui diffèrent du calcul automatique, pour que la grille reste recalculable.
 function buildExport(){
   const g=model(ov), p=modelP(ovP);
-  return {app:'diagrammes-accords',version:1,chords:chords.slice(),level:$('lvl').value,capo:+capoSel.value,
-    guitare:g.runs.map((r,k)=>{const c=g.chosen[k]; return {accord:r.t,mesure:r.i+1,mesures:r.n,...(c?{frettes:c.f,doigts:c.g.join(''),barre:c.b}:{})};}),
-    piano:p.runs.map((r,k)=>{const c=p.chosen[k]; return {accord:r.t,mesure:r.i+1,mesures:r.n,...(c?{main_gauche:c.bm,main_droite:c.n}:{})};})};
+  return {app:'diagrammes-accords',schema:SCHEMA_VERSION,appVersion:APP_VERSION,dbVersion:DB_VERSION,exportedAt:new Date().toISOString(),
+    chords:chords.slice(),structure:chords.map(chordToStructure),level:$('lvl').value,capo:+capoSel.value,
+    guitare:g.runs.map((r,k)=>{const c=g.chosen[k]; return {accord:r.t,mesure:r.i+1,mesures:r.n,...(c?{frettes:c.f,doigts:c.g.join(''),barre:c.b,origine:ov[r.i]!=null?'manuel':'auto'}:{})};}),
+    piano:p.runs.map((r,k)=>{const c=p.chosen[k]; return {accord:r.t,mesure:r.i+1,mesures:r.n,...(c?{main_gauche:c.bm,main_droite:c.n,origine:ovP[r.i]!=null?'manuel':'auto'}:{})};})};
 }
 // On fixe des choix un à un jusqu'à retrouver la solution exportée, puis on retire ceux qui ne servent à rien :
 // la grille importée reste ainsi recalculable automatiquement autour des seuls choix manuels réels.
+// Une solution est repérée par sa position (mesure) et vérifiée par son contenu (frettes / notes), jamais par un identifiant interne.
+// Renvoie le nombre de solutions qui n'ont pas pu être reproduites (elles sont alors recalculées).
 function pinAll(list,mdl,pins,keyOf){
-  const skip=new Set(), find=(m,s)=>m.runs.findIndex(r=>r.i===s.mesure-1&&r.t===s.accord);
+  const skip=new Set(), keep=new Set(), find=(m,s)=>m.runs.findIndex(r=>r.i===s.mesure-1);
   const firstBad=m=>{
     for(const s of list){const k=find(m,s); if(k<0||skip.has(k)) continue; const c=m.chosen[k]; if(c&&keyOf(c)!==s.key) return [k,s];}
     return null;
   };
+  // 1) Les choix marqués « manuel » sont repris tels quels : c'est l'intention de l'utilisateur, ils ne sont jamais retirés.
+  const m0=mdl({});
+  list.filter(s=>s.origine==='manuel').forEach(s=>{
+    const k=find(m0,s); if(k<0) return;
+    const c=m0.items[k].full.find(c=>keyOf(c)===s.key); if(c){pins[m0.runs[k].i]=c.id; keep.add(String(m0.runs[k].i));}
+  });
+  // 2) Puis on ajoute le strict nécessaire pour retrouver le reste de la solution exportée.
   for(let it=0;it<=list.length;it++){
     const m=mdl(pins), bad=firstBad(m); if(!bad) break;
     const [k,s]=bad, c=m.items[k].full.find(c=>keyOf(c)===s.key);
     if(c) pins[m.runs[k].i]=c.id; else skip.add(k);
   }
-  Object.keys(pins).forEach(i=>{const v=pins[i]; delete pins[i]; if(firstBad(mdl(pins))) pins[i]=v;});
+  Object.keys(pins).forEach(i=>{ if(keep.has(i)) return; const v=pins[i]; delete pins[i]; if(firstBad(mdl(pins))) pins[i]=v; });
+  const m=mdl(pins);
+  return list.filter(s=>{const k=find(m,s), c=k<0?null:m.chosen[k]; return !c||keyOf(c)!==s.key;}).length;
 }
+// Importe un document (fichier ou lien) : migration vers le format courant, résolution des accords, puis choix de doigtés.
+// Renvoie {n: nombre d'accords (0 si le document n'est pas reconnu), warnings: [...]}.
 function applyImport(d){
-  if(!d||d.app!=='diagrammes-accords'||!Array.isArray(d.chords)) return 0;
-  const cs=d.chords.filter(x=>typeof x=='string'&&parse(x)); if(!cs.length) return 0;
-  chords=cs; ov={}; ovP={};
-  if(['full','easy'].includes(d.level)) $('lvl').value=d.level;
-  capoSel.value=String(Math.min(7,Math.max(0,Math.round(+d.capo||0))));
+  const r=normalizeImport(d); if(r.error) return {n:0,warnings:[]};
+  const doc=r.doc, rc=resolveChords(doc), warnings=r.warnings.slice();
+  if(!rc.chords.length) return {n:0,warnings};
+  if(rc.bad.length) warnings.push(`${rc.bad.length} accord(s) non reconnu(s) ignoré(s) (mesure ${rc.bad.join(', ')}).`);
+  chords=rc.chords; ov={}; ovP={};
+  if(['full','easy'].includes(doc.level)) $('lvl').value=doc.level;
+  capoSel.value=String(Math.min(7,Math.max(0,Math.round(+doc.capo||0))));
   const mk=(arr,f)=>(Array.isArray(arr)?arr:[]).filter(s=>s&&f(s)).map(s=>({...s,key:f(s)}));
-  pinAll(mk(d.guitare,s=>Array.isArray(s.frettes)&&s.frettes.join()),model,ov,c=>c.f.join());
-  pinAll(mk(d.piano,s=>Array.isArray(s.main_droite)&&s.main_droite.join()+'|'+s.main_gauche),modelP,ovP,c=>c.n.join()+'|'+c.bm);
-  return cs.length;
+  const lost=pinAll(mk(doc.guitare,s=>Array.isArray(s.frettes)&&s.frettes.join()),model,ov,c=>c.f.join())
+            +pinAll(mk(doc.piano,s=>Array.isArray(s.main_droite)&&s.main_droite.join()+'|'+s.main_gauche),modelP,ovP,c=>c.n.join()+'|'+c.bm);
+  if(lost) warnings.push(lost>1?`${lost} choix de doigté n'ont pas pu être reproduits : ils sont recalculés automatiquement.`:`1 choix de doigté n'a pas pu être reproduit : il est recalculé automatiquement.`);
+  return {n:chords.length,warnings};
 }
 // ==/IO==
 $('exp').onclick=()=>{
@@ -444,8 +516,8 @@ $('exp').onclick=()=>{
 $('impB').onclick=()=>$('imp').click();
 $('imp').onchange=async e=>{
   const f=e.target.files[0]; e.target.value=''; if(!f) return;
-  let n=0; try{ n=applyImport(JSON.parse(await f.text())); }catch(_){}
-  $('msg').textContent=n?`Grille importée (${n} accords).`:'Fichier non reconnu.'; if(n) render();
+  let r={n:0,warnings:[]}; try{ r=applyImport(JSON.parse(await f.text())); }catch(_){}
+  $('msg').textContent=r.n?`Grille importée (${r.n} accords).`+(r.warnings.length?' ⚠ '+r.warnings.join(' '):''):'Fichier non reconnu.'; if(r.n) render();
 };
 // ==SHARE==
 // Lien de partage : tout est dans la partie après « # » (jamais envoyée à un serveur). On n'y met que les choix manuels.
@@ -454,17 +526,17 @@ const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,'+').
 function buildShare(){
   const g=model(ov), p=modelP(ovP);
   const pick=(m,pins,f)=>m.runs.map((r,k)=>({r,c:m.chosen[k]})).filter(x=>x.c&&pins[x.r.i]!=null).map(x=>f(x.r,x.c));
-  return {app:'diagrammes-accords',version:1,chords:chords.slice(),level:$('lvl').value,capo:+capoSel.value,tab,
-    guitare:pick(g,ov,(r,c)=>({accord:r.t,mesure:r.i+1,frettes:c.f})),
-    piano:pick(p,ovP,(r,c)=>({accord:r.t,mesure:r.i+1,main_gauche:c.bm,main_droite:c.n}))};
+  return {app:'diagrammes-accords',schema:SCHEMA_VERSION,appVersion:APP_VERSION,chords:chords.slice(),structure:chords.map(chordToStructure),level:$('lvl').value,capo:+capoSel.value,tab,
+    guitare:pick(g,ov,(r,c)=>({accord:r.t,mesure:r.i+1,frettes:c.f,origine:'manuel'})),
+    piano:pick(p,ovP,(r,c)=>({accord:r.t,mesure:r.i+1,main_gauche:c.bm,main_droite:c.n,origine:'manuel'}))};
 }
 const shareLink=()=>location.href.split('#')[0]+'#s='+b64e(JSON.stringify(buildShare()));
 function decodeShare(hash){const m=(hash||'').match(/^#s=([\w-]+)$/); if(!m) return null; try{return JSON.parse(b64d(m[1]));}catch(_){return null;}}
 // ==/SHARE==
 function loadFromHash(){
   if(!/^#s=/.test(location.hash)) return;
-  const d=decodeShare(location.hash);
-  if(d&&applyImport(d)){ setTab(d.tab=='p'?'p':'g'); $('msg').textContent='Grille partagée chargée.'; }
+  const d=decodeShare(location.hash), r=d?applyImport(d):{n:0,warnings:[]};
+  if(r.n){ setTab(d.tab=='p'?'p':'g'); $('msg').textContent='Grille partagée chargée.'+(r.warnings.length?' ⚠ '+r.warnings.join(' '):''); }
   else $('msg').textContent='Lien de partage invalide.';
 }
 const closeS=()=>$('ssheet').classList.remove('open');
@@ -489,6 +561,32 @@ $('scopy').onclick=async()=>{
 };
 window.addEventListener('hashchange',loadFromHash);
 loadFromHash();
+// ==THEME==
+// Thème : variables CSS (voir theme.css) + réglages possibles dans l'adresse, utiles pour intégrer l'appli dans un autre projet.
+// Ex. ?theme=dark&accent=ff6600&bg=101418&radius=4&font=Georgia&strings=1
+const COLORS={bg:'--bg',panel:'--panel',ink:'--ink',muted:'--muted',line:'--line',accent:'--accent',accentink:'--accent-ink',warn:'--warn',bass:'--bass',key:'--key',keyline:'--keyline',blackkey:'--blackkey'};
+function parseTheme(search){
+  const q=new URLSearchParams(search), out={theme:null,strings:null,vars:{}};
+  if(['light','dark','auto'].includes(q.get('theme'))) out.theme=q.get('theme');
+  if(['0','1'].includes(q.get('strings'))) out.strings=q.get('strings')==='1';
+  for(const [name,prop] of Object.entries(COLORS)){const v=q.get(name); if(v&&/^#?[0-9a-f]{3,8}$/i.test(v)) out.vars[prop]='#'+v.replace(/^#/,'');}
+  const r=q.get('radius'); if(r&&/^\d{1,2}(px|rem)?$/.test(r)) out.vars['--radius']=/\D/.test(r)?r:r+'px';
+  [['font','--font-body'],['fonttitle','--font-title']].forEach(([name,prop])=>{const v=q.get(name); if(v&&/^[\w ,'"-]{1,80}$/.test(v)) out.vars[prop]=v;});
+  return out;
+}
+// ==/THEME==
+const pref=(k,v)=>{try{ if(v===undefined) return localStorage.getItem('accords.'+k); localStorage.setItem('accords.'+k,v); }catch(_){ return null; }};
+const setMode=t=>{ if(t==='light'||t==='dark') document.documentElement.dataset.theme=t; else document.documentElement.removeAttribute('data-theme'); };
+{
+  const th=parseTheme(location.search), saved=pref('theme');
+  const mode=th.theme||(['auto','light','dark'].includes(saved)?saved:'auto');
+  $('thm').value=mode; setMode(mode);
+  Object.entries(th.vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
+  thick=th.strings!==null?th.strings:pref('strings')==='1'; $('strg').value=thick?'1':'0';
+}
+$('thm').onchange=()=>{setMode($('thm').value); pref('theme',$('thm').value);};
+$('strg').onchange=()=>{thick=$('strg').value==='1'; pref('strings',thick?'1':'0'); render();};
+$('ver').textContent=`Version ${APP_VERSION} · format de fichier ${SCHEMA_VERSION} · symboles d'accords ${CHORD_LIB_VERSION} · doigtés guitare : ${DB_VERSION}`;
 render();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}</script>

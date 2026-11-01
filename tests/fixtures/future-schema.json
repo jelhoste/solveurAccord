@@ -1,0 +1,284 @@
+{
+ "app": "diagrammes-accords",
+ "schema": 99,
+ "appVersion": "1.0.0",
+ "dbVersion": "chords-db 0.5.1",
+ "exportedAt": "2026-11-01T00:00:00.000Z",
+ "chords": [
+  "Am",
+  "F/A",
+  "C",
+  "G7",
+  "Bm",
+  "Em7",
+  "A5",
+  "D5(2)"
+ ],
+ "structure": [
+  [
+   9,
+   "minor",
+   null
+  ],
+  [
+   5,
+   "type-du-futur",
+   null
+  ],
+  [
+   0,
+   "major",
+   null
+  ],
+  [
+   7,
+   "7",
+   null
+  ],
+  [
+   11,
+   "minor",
+   null
+  ],
+  [
+   4,
+   "m7",
+   null
+  ],
+  [
+   9,
+   "5",
+   null
+  ],
+  [
+   2,
+   "5(2)",
+   null
+  ]
+ ],
+ "level": "easy",
+ "capo": 2,
+ "guitare": [
+  {
+   "accord": "Am",
+   "mesure": 1,
+   "mesures": 1,
+   "frettes": [
+    3,
+    1,
+    0,
+    0,
+    3,
+    3
+   ],
+   "doigts": "210034",
+   "barre": null
+  },
+  {
+   "accord": "F/A",
+   "mesure": 2,
+   "mesures": 1,
+   "frettes": [
+    -1,
+    -1,
+    1,
+    3,
+    4,
+    3
+   ],
+   "doigts": "001243",
+   "barre": null
+  },
+  {
+   "accord": "C",
+   "mesure": 3,
+   "mesures": 1,
+   "frettes": [
+    -1,
+    1,
+    3,
+    3,
+    3,
+    1
+   ],
+   "doigts": "012341",
+   "barre": [
+    1,
+    5,
+    1
+   ]
+  },
+  {
+   "accord": "G7",
+   "mesure": 4,
+   "mesures": 1,
+   "frettes": [
+    -1,
+    3,
+    3,
+    5,
+    4,
+    5
+   ],
+   "doigts": "011324",
+   "barre": [
+    3,
+    5,
+    4
+   ]
+  },
+  {
+   "accord": "Bm",
+   "mesure": 5,
+   "mesures": 1,
+   "frettes": [
+    -1,
+    0,
+    7,
+    9,
+    10,
+    8
+   ],
+   "doigts": "001342",
+   "barre": null
+  },
+  {
+   "accord": "Em7",
+   "mesure": 6,
+   "mesures": 1,
+   "frettes": [
+    -1,
+    -1,
+    0,
+    2,
+    3,
+    1
+   ],
+   "doigts": "000231",
+   "barre": null
+  },
+  {
+   "accord": "A5",
+   "mesure": 7,
+   "mesures": 1,
+   "frettes": [
+    3,
+    5,
+    5,
+    -1,
+    -1,
+    -1
+   ],
+   "doigts": "134000",
+   "barre": null
+  },
+  {
+   "accord": "D5(2)",
+   "mesure": 8,
+   "mesures": 1,
+   "frettes": [
+    -1,
+    3,
+    5,
+    -1,
+    -1,
+    -1
+   ],
+   "doigts": "013000",
+   "barre": null
+  }
+ ],
+ "piano": [
+  {
+   "accord": "Am",
+   "mesure": 1,
+   "mesures": 1,
+   "main_gauche": 57,
+   "main_droite": [
+    69,
+    72,
+    76
+   ]
+  },
+  {
+   "accord": "F/A",
+   "mesure": 2,
+   "mesures": 1,
+   "main_gauche": 57,
+   "main_droite": [
+    69,
+    72,
+    77
+   ]
+  },
+  {
+   "accord": "C",
+   "mesure": 3,
+   "mesures": 1,
+   "main_gauche": 48,
+   "main_droite": [
+    67,
+    72,
+    76
+   ]
+  },
+  {
+   "accord": "G7",
+   "mesure": 4,
+   "mesures": 1,
+   "main_gauche": 55,
+   "main_droite": [
+    67,
+    71,
+    74,
+    77
+   ]
+  },
+  {
+   "accord": "Bm",
+   "mesure": 5,
+   "mesures": 1,
+   "main_gauche": 59,
+   "main_droite": [
+    71,
+    74,
+    78
+   ]
+  },
+  {
+   "accord": "Em7",
+   "mesure": 6,
+   "mesures": 1,
+   "main_gauche": 52,
+   "main_droite": [
+    71,
+    76,
+    79
+   ]
+  },
+  {
+   "accord": "A5",
+   "mesure": 7,
+   "mesures": 1,
+   "main_gauche": 57,
+   "main_droite": [
+    69,
+    76,
+    81
+   ]
+  },
+  {
+   "accord": "D5(2)",
+   "mesure": 8,
+   "mesures": 1,
+   "main_gauche": 50,
+   "main_droite": [
+    69,
+    74
+   ]
+  }
+ ],
+ "champInconnu": {
+  "x": 1
+ }
+}
