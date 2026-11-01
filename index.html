@@ -32,8 +32,8 @@ button{cursor:pointer;background:var(--accent);color:var(--accent-ink);border-co
 button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 #sugg{margin-top:14px;padding:10px 14px;border-radius:calc(var(--radius)*.8);background:var(--warn);display:none;gap:12px;align-items:center;flex-wrap:wrap}
 #grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-.card{width:128px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:8px 6px 6px;text-align:center;cursor:pointer;color:var(--ink)}
-.card b{font-size:1.15rem;display:block}
+.card{width:calc(128px*var(--zoom,1));max-width:100%;font-size:calc(1rem*var(--zoom,1));background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:8px 6px 6px;text-align:center;cursor:pointer;color:var(--ink)}
+.card b{font-size:1.15em;display:block}
 .card small{color:var(--muted);display:block;min-height:1.2em}
 .card svg{width:100%;height:auto;display:block}
 .hint{color:var(--muted);font-size:.85rem;margin-top:14px}
@@ -62,10 +62,10 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 /* Tokens de thème (voir theme.css) : couleurs, clavier du piano, arrondis, polices */
 :root{--bass:#d9731f;--keyline:#8a98a1;--blackkey:#1b242b;--key:#fdfdfd;--radius:10px;
 --font-body:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;--font-title:Georgia,"Times New Roman",serif}
-.tabs{display:flex;gap:6px;margin-top:16px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
 .tabs button{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 20px}
 .tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.card.pn{width:236px}
+.card.pn{width:calc(236px*var(--zoom,1))}
 .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 #ssheet{position:fixed;inset:0;display:none;z-index:10}
 #ssheet.open{display:block}
@@ -75,13 +75,31 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 button:disabled{opacity:.4;cursor:default}
 .sh{flex-wrap:wrap}
 #prv,#nxt{padding:8px 12px}
+/* Zoom, cadenas, et pas de menu d'appui long du navigateur sur les zones interactives */
+.card,.chip,.tabs button,.tools button,#lockB{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.tl{display:flex;gap:6px}
+.vt{display:flex;gap:6px;align-items:center;margin-left:auto}
+.vt button{padding:8px 12px;min-width:42px}
+#zLab{min-width:3.6em;text-align:center;color:var(--muted);font-size:.85rem}
+#lockB{position:relative;overflow:hidden;touch-action:none;display:inline-flex;align-items:center;justify-content:center}
+#lockB svg{position:relative}
+#lockB::before{content:"";position:absolute;inset:0;background:var(--accent);opacity:.35;transform:scaleX(0);transform-origin:left}
+#lockB.arming::before{animation:arm .6s linear forwards}
+@keyframes arm{to{transform:scaleX(1)}}
+@media (prefers-reduced-motion:reduce){#lockB.arming::before{animation:none;transform:scaleX(.5)}}
+.ic-closed{display:none}
+.locked .ic-open{display:none}
+.locked .ic-closed{display:inline}
+.locked #lockB{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.locked .card{cursor:default}
+#vmsg{margin:6px 0 0;min-height:1.3em}
 </style>
 <link rel="stylesheet" href="theme.css">
 </head>
 <body>
 <main>
 <h1>Diagrammes d'accords</h1>
-<p class="lead">Compose ta grille avec les boutons d'accords : la page choisit pour chacun le doigté le plus facile à enchaîner pour un débutant.</p>
+<p class="lead">Composez votre grille avec les boutons d'accords : la page choisit pour chacun le doigté le plus facile à enchaîner pour un débutant.</p>
 <div class="panel">
 <div class="tools"><button class="sec" id="presets">Grilles types (blues, pop…)</button><button class="sec" id="exp">Exporter</button><button class="sec" id="impB">Importer</button><button id="shr">Partager</button><input type="file" id="imp" accept=".json,application/json" hidden><span id="msg" class="hint" style="margin:0" aria-live="polite"></span></div>
 <div id="slots" class="chips" aria-label="Grille d'accords"></div>
@@ -94,15 +112,17 @@ button:disabled{opacity:.4;cursor:default}
 </div>
 <div id="sugg"><span id="suggT"></span><button id="suggB">Appliquer</button></div>
 </div>
-<div class="tabs" role="tablist"><button role="tab" id="tabG" aria-selected="true">Guitare</button><button role="tab" id="tabP" aria-selected="false">Piano</button></div>
+<div class="tabs"><div class="tl" role="tablist"><button role="tab" id="tabG" aria-selected="true">Guitare</button><button role="tab" id="tabP" aria-selected="false">Piano</button></div>
+<div class="vt" role="group" aria-label="Affichage"><button class="sec" id="zOut" aria-label="Réduire les diagrammes" title="Réduire les diagrammes">−</button><span id="zLab" aria-live="polite">100 %</span><button class="sec" id="zIn" aria-label="Agrandir les diagrammes" title="Agrandir les diagrammes">+</button><button class="sec" id="lockB" aria-pressed="false" aria-label="Verrouiller l'interface (appui long)" title="Appui long pour verrouiller"><svg class="ic-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.8"/></svg><svg class="ic-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button></div></div>
+<div id="vmsg" class="hint" aria-live="polite"></div>
 <div id="grid" aria-live="polite"></div>
-<p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Clique sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de ton choix. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
+<p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Cliquez sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de votre choix. Une fois les bons diagrammes choisis, maintenez le cadenas appuyé pour verrouiller l'interface. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
 <p class="hint" id="ver" style="margin-top:4px"></p>
 </main>
 <div id="ssheet"><div class="back" id="sback"></div>
 <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sT">
 <div class="sh"><strong id="sT">Partager cette grille</strong><button id="sok">Fermer</button></div>
-<p class="hint" style="margin:0 0 8px">Le lien contient la grille, le niveau, le capo et tes choix de doigtés : la personne qui l'ouvre arrive directement sur ta version.</p>
+<p class="hint" style="margin:0 0 8px">Le lien contient la grille, le niveau, le capo et vos choix de doigtés : la personne qui l'ouvre arrive directement sur votre version.</p>
 <input class="lk" id="slink" readonly aria-label="Lien de partage">
 <div class="acts"><button id="scopy">Copier le lien</button><a id="smail" href="#">E-mail</a><a id="sgm" href="#" target="_blank" rel="noopener">Gmail</a><button class="sec" id="snat">Partager…</button><span id="sfb" class="hint" style="margin:0" aria-live="polite"></span></div>
 <p class="hint" id="swarn" style="margin-bottom:0"></p>
@@ -149,7 +169,7 @@ function structureToChord(s){
 // ==COMPAT==
 // Versions. APP_VERSION : l'appli (semver ; garder identique à VERSION dans sw.js). SCHEMA_VERSION : format des fichiers d'export
 // et des liens de partage (entier, +1 à chaque changement incompatible ; les ajouts de champs ne le changent pas).
-const APP_VERSION='1.2.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
+const APP_VERSION='1.3.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
 // MIGRATIONS[n] transforme un document de format n en format n+1. Ne jamais modifier une migration déjà publiée : en ajouter une.
 const MIGRATIONS={
   1:d=>({...d,schema:2,structure:(Array.isArray(d.chords)?d.chords:[]).map(chordToStructure)})   // v1 : symboles seuls
@@ -272,7 +292,7 @@ function svg(c){
   let s=`<svg viewBox="0 0 100 106" role="img" aria-label="diagramme" fill="none" stroke="currentColor" stroke-width="1">`;
   for(let i=0;i<6;i++) s+=`<line x1="${X(i)}" y1="${top}" x2="${X(i)}" y2="${top+rows*fh}"${thick?` stroke-width="${STR_W[i]}"`:''}/>`;
   for(let j=0;j<=rows;j++) s+=`<line x1="${X(0)}" y1="${top+j*fh}" x2="${X(5)}" y2="${top+j*fh}" ${j==0&&start==1?'stroke-width="3"':''}/>`;
-  if(start>1) s+=`<text x="${X(5)+6}" y="${top+fh*0.7}" font-size="9" fill="currentColor" stroke="none">${start}</text>`;
+  if(start>1) s+=`<text x="${X(5)+6}" y="${top+fh*0.5+4}" font-size="11.25" fill="currentColor" stroke="none">${start}</text>`;
   c.f.forEach((f,i)=>{ if(f<0) s+=`<text x="${X(i)}" y="16" font-size="10" text-anchor="middle" fill="currentColor" stroke="none">×</text>`;
     else if(f==0) s+=`<circle cx="${X(i)}" cy="12" r="3" stroke-width="1.2"/>`;});
   if(c.b){const [bf,a,z]=c.b,x1=X(6-a),x2=X(6-z),y=top+(bf-start+0.5)*fh;
@@ -289,7 +309,7 @@ function svg(c){
 // Interface
 const $=id=>document.getElementById(id);
 const capoSel=$('capo'); for(let k=0;k<=7;k++) capoSel.add(new Option(k?`Case ${k}`:'Sans capo',k));
-let ov={}, ovP={}, tab='g', thick=true;
+let ov={}, ovP={}, tab='g', thick=true, locked=false, zoom=1;
 let chords=['Am','F','C','G7','Am','F','C','E7'];
 function tokens(){return chords.slice();}
 // Regroupe les accords identiques consécutifs : un seul diagramme par série
@@ -312,7 +332,7 @@ function renderG(){
   }).join('');
   // suggestion de capo (calculée sur la suite d'accords sans répétitions consécutives)
   const sg=$('sugg'); sg.style.display='none';
-  if(!Object.keys(ov).length){
+  if(!locked&&!Object.keys(ov).length){
     const rt=runs.map(r=>r.t); let best=null,cur=null;
     for(let k=0;k<=7;k++){
       const r=solve(build(rt,k,lvl,{})), cost=r.cost+1.5*(k>0);
@@ -326,6 +346,7 @@ function renderG(){
 }
 $('grid').addEventListener('click',e=>{
   const el=e.target.closest('.card[data-i]'); if(!el) return;
+  if(locked){ vmsg('Interface verrouillée : maintenez le cadenas appuyé pour la déverrouiller.'); return; }
   const k=+el.dataset.i;
   if(tab=='p'){const full=modelP({}).items[k].full, m=modelP(ovP);
     if(full.length>1){const c=m.chosen[k]; ovP[m.runs[k].i]=((c?c.id:0)+1)%full.length; render();} return;}
@@ -445,9 +466,9 @@ function renderP(){
 }
 // ==/PIANO==
 const slotsHTML=()=>{$('slots').innerHTML=chords.map((c,i)=>`<button class="chip" data-i="${i}">${c}</button>`).join('')+'<button class="chip add" id="add" aria-label="Ajouter un accord">+</button>';};
-function render(){ if(tab=='g') renderG(); else {slotsHTML(); renderP();} }
+function render(){ if(tab=='g') renderG(); else {slotsHTML(); renderP();} applyLockUi(); }
 const hintG=$('hint').innerHTML;
-const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que tu peux jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Clique sur un clavier pour changer de renversement. Le capo ne s'applique pas au piano.";
+const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que vous pouvez jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Cliquez sur un clavier pour changer de renversement. Une fois les bons renversements choisis, maintenez le cadenas appuyé pour verrouiller l'interface. Le capo ne s'applique pas au piano.";
 function setTab(t){
   tab=t; $('tabG').setAttribute('aria-selected',t=='g'); $('tabP').setAttribute('aria-selected',t=='p');
   $('capoL').style.display=$('strgL').style.display=t=='g'?'':'none'; $('sugg').style.display='none';
@@ -534,7 +555,7 @@ const shareLink=()=>location.href.split('#')[0]+'#s='+b64e(JSON.stringify(buildS
 function decodeShare(hash){const m=(hash||'').match(/^#s=([\w-]+)$/); if(!m) return null; try{return JSON.parse(b64d(m[1]));}catch(_){return null;}}
 // ==/SHARE==
 function loadFromHash(){
-  if(!/^#s=/.test(location.hash)) return;
+  if(!/^#s=/.test(location.hash)||locked) return;
   const d=decodeShare(location.hash), r=d?applyImport(d):{n:0,warnings:[]};
   if(r.n){ setTab(d.tab=='p'?'p':'g'); $('msg').textContent='Grille partagée chargée.'+(r.warnings.length?' ⚠ '+r.warnings.join(' '):''); }
   else $('msg').textContent='Lien de partage invalide.';
@@ -543,21 +564,21 @@ const closeS=()=>$('ssheet').classList.remove('open');
 function openShare(){
   const url=shareLink(), grid=chords.join(' | '), fb=$('sfb');
   const subject="Grille d'accords : "+chords.slice(0,4).join(' ')+(chords.length>4?'…':'');
-  const body=("Voici une grille d'accords :\n"+grid+"\n\nOuvre ce lien pour la voir avec les diagrammes (guitare et piano) et les doigtés choisis :\n"+url).replace(/\n/g,'\r\n');
+  const body=("Voici une grille d'accords :\n"+grid+"\n\nOuvrez ce lien pour la voir avec les diagrammes (guitare et piano) et les doigtés choisis :\n"+url).replace(/\n/g,'\r\n');
   $('slink').value=url; fb.textContent='';
   $('smail').href='mailto:?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
   $('sgm').href='https://mail.google.com/mail/?view=cm&fs=1&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
   $('snat').style.display=navigator.share?'':'none';
   $('snat').onclick=()=>navigator.share({title:subject,text:"Grille d'accords : "+grid,url}).catch(()=>{});
   $('swarn').textContent=!/^https?:/.test(url)?"Ce lien ne fonctionnera que si l'appli est ouverte depuis son adresse web (hébergée).":
-    url.length>1800?"Ce lien est long : certains logiciels de messagerie peuvent le tronquer. Dans ce cas, utilise plutôt « Exporter ».":'';
+    url.length>1800?"Ce lien est long : certains logiciels de messagerie peuvent le tronquer. Dans ce cas, utilisez plutôt « Exporter ».":'';
   $('ssheet').classList.add('open'); $('sok').focus();
 }
 $('shr').onclick=openShare; $('sok').onclick=closeS; $('sback').onclick=closeS;
 $('scopy').onclick=async()=>{
   const i=$('slink'); i.select();
   try{ await navigator.clipboard.writeText(i.value); $('sfb').textContent='Lien copié.'; }
-  catch(_){ let ok=false; try{ok=document.execCommand('copy');}catch(__){} $('sfb').textContent=ok?'Lien copié.':'Copie automatique impossible : le lien est sélectionné, copie-le à la main.'; }
+  catch(_){ let ok=false; try{ok=document.execCommand('copy');}catch(__){} $('sfb').textContent=ok?'Lien copié.':'Copie automatique impossible : le lien est sélectionné, copiez-le à la main.'; }
 };
 window.addEventListener('hashchange',loadFromHash);
 loadFromHash();
@@ -569,6 +590,7 @@ function parseTheme(search){
   const q=new URLSearchParams(search), out={theme:null,strings:null,vars:{}};
   if(['light','dark','auto'].includes(q.get('theme'))) out.theme=q.get('theme');
   if(['0','1'].includes(q.get('strings'))) out.strings=q.get('strings')==='1';
+  const z=parseFloat(q.get('zoom')); if(z>=0.5&&z<=4) out.zoom=z;
   for(const [name,prop] of Object.entries(COLORS)){const v=q.get(name); if(v&&/^#?[0-9a-f]{3,8}$/i.test(v)) out.vars[prop]='#'+v.replace(/^#/,'');}
   const r=q.get('radius'); if(r&&/^\d{1,2}(px|rem)?$/.test(r)) out.vars['--radius']=/\D/.test(r)?r:r+'px';
   [['font','--font-body'],['fonttitle','--font-title']].forEach(([name,prop])=>{const v=q.get(name); if(v&&/^[\w ,'"-]{1,80}$/.test(v)) out.vars[prop]=v;});
@@ -587,6 +609,47 @@ const setMode=t=>{ if(t==='light'||t==='dark') document.documentElement.dataset.
 }
 $('thm').onchange=()=>{setMode($('thm').value); pref('theme',$('thm').value);};
 $('strg').onchange=()=>{thick=$('strg').value==='1'; pref('strings',thick?'1':'0'); render();};
+// ==VIEW==
+// Zoom des diagrammes et verrouillage de l'interface (appui long sur le cadenas).
+const ZOOMS=[0.75,1,1.25,1.5,2,2.5,3];
+function setZoom(z,save=true){
+  zoom=z; document.documentElement.style.setProperty('--zoom',z); $('zLab').textContent=Math.round(z*100)+' %';
+  $('zOut').disabled=!ZOOMS.some(v=>v<z-1e-6); $('zIn').disabled=!ZOOMS.some(v=>v>z+1e-6);
+  if(save) pref('zoom',String(z));
+}
+const stepZoom=d=>{ const z=d>0?ZOOMS.find(v=>v>zoom+1e-6):[...ZOOMS].reverse().find(v=>v<zoom-1e-6); if(z) setZoom(z); };
+$('zIn').onclick=()=>stepZoom(1); $('zOut').onclick=()=>stepZoom(-1);
+{ const saved=parseFloat(pref('zoom')), fromUrl=parseTheme(location.search).zoom; setZoom(fromUrl||(saved>=0.5&&saved<=4?saved:1),false); }
+
+const LOCK_MS=600; let lockTimer=null;
+const vmsg=t=>{ $('vmsg').textContent=t; };
+function applyLockUi(){
+  document.documentElement.classList.toggle('locked',locked);
+  const lb=$('lockB'); lb.setAttribute('aria-pressed',String(locked));
+  lb.setAttribute('aria-label',locked?"Déverrouiller l'interface (appui long)":"Verrouiller l'interface (appui long)");
+  lb.title=locked?'Appui long pour déverrouiller':'Appui long pour verrouiller';
+  ['presets','impB','lvl','capo'].forEach(id=>{ $(id).disabled=locked; });
+  document.querySelectorAll('#slots button').forEach(b=>{ b.disabled=locked; });
+  document.querySelectorAll('#grid .card[data-i]').forEach(c=>c.setAttribute('aria-disabled',String(locked)));
+}
+function toggleLock(){
+  locked=!locked; applyLockUi();
+  if(locked){ closeSheet(); closeP(); $('sugg').style.display='none'; } else render();
+  vmsg(locked?'Interface verrouillée. Maintenez le cadenas appuyé pour la déverrouiller.':'Interface déverrouillée.');
+  try{ navigator.vibrate&&navigator.vibrate(30); }catch(_){}
+}
+{
+  const lb=$('lockB');
+  const arm=()=>{ if(lockTimer) return; lb.classList.add('arming'); lockTimer=setTimeout(()=>{ lockTimer=null; lb.classList.remove('arming'); toggleLock(); },LOCK_MS); };
+  const disarm=()=>{ lb.classList.remove('arming'); if(lockTimer){ clearTimeout(lockTimer); lockTimer=null; vmsg(locked?'Maintenez le cadenas appuyé pour déverrouiller.':'Maintenez le cadenas appuyé pour verrouiller.'); } };
+  lb.addEventListener('pointerdown',e=>{ if(e.button>0) return; arm(); });
+  ['pointerup','pointercancel','pointerleave','blur'].forEach(t=>lb.addEventListener(t,disarm));
+  lb.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&!e.repeat){ e.preventDefault(); arm(); } });
+  lb.addEventListener('keyup',e=>{ if(e.key==='Enter'||e.key===' ') disarm(); });
+}
+// Pas de menu contextuel du navigateur (appui long) sur les zones interactives ; les champs de saisie gardent le leur.
+document.addEventListener('contextmenu',e=>{ if(e.target.closest&&e.target.closest('#lockB,.vt,.tabs,#grid,#slots,.tools,.sheet')&&!e.target.closest('input,textarea')) e.preventDefault(); });
+// ==/VIEW==
 $('ver').textContent=`Version ${APP_VERSION} · format de fichier ${SCHEMA_VERSION} · symboles d'accords ${CHORD_LIB_VERSION} · doigtés guitare : ${DB_VERSION}`;
 render();
 </script>
