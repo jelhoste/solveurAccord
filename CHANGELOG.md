@@ -3,6 +3,10 @@
 Versionnage : `APP_VERSION` suit le semver (MAJEUR.MINEUR.CORRECTIF) ; `SCHEMA_VERSION` est le numéro entier du format des
 fichiers d'export et des liens de partage (voir FORMAT.md).
 
+## 1.3.2 - 2026-11-01 (format de fichier : 2, inchangé)
+- Cordes les plus fines : le mi aigu retrouve son épaisseur d'avant (0,6) et le si est aligné dessus, donc les deux cordes fines ont la même
+  épaisseur. Les quatre cordes graves gardent leur réduction de 30 %.
+
 ## 1.3.1 - 2026-11-01 (format de fichier : 2, inchangé)
 - Épaisseurs réalistes des cordes réduites de 30 % (mêmes proportions entre les six cordes).
 - Grille des diagrammes de guitare élargie de 10 % (écart entre cordes de 11 à 12,1).
