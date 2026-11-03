@@ -60,7 +60,7 @@ button:focus-visible,select:focus-visible,textarea:focus-visible,.card:focus-vis
 .pre{text-align:left;padding:10px 12px}
 .pre small{display:block;font-weight:400;opacity:.8;margin-top:2px}
 /* Tokens de thème (voir theme.css) : couleurs, clavier du piano, arrondis, polices */
-:root{--bass:#d9731f;--keyline:#8a98a1;--blackkey:#1b242b;--key:#fdfdfd;--radius:10px;
+:root{--bass:#d9731f;--keyline:#8a98a1;--blackkey:#1b242b;--key:#fdfdfd;--pivot:#e0a100;--pivot-ink:#1b242b;--radius:10px;
 --font-body:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;--font-title:Georgia,"Times New Roman",serif}
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
 .tabs button{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 20px}
@@ -93,6 +93,12 @@ button:disabled{opacity:.4;cursor:default}
 .locked #lockB{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .locked .card{cursor:default}
 #vmsg{margin:6px 0 0;min-height:1.3em}
+#lsheet{position:fixed;inset:0;display:none;z-index:10}
+#lsheet.open{display:block}
+.lrow{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.lmeta{flex:1;min-width:0}
+.lmeta b,.lmeta small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lmeta small{color:var(--muted)}
 </style>
 <link rel="stylesheet" href="theme.css">
 </head>
@@ -101,13 +107,14 @@ button:disabled{opacity:.4;cursor:default}
 <h1>Diagrammes d'accords</h1>
 <p class="lead">Composez votre grille avec les boutons d'accords : la page choisit pour chacun le doigté le plus facile à enchaîner pour un débutant.</p>
 <div class="panel">
-<div class="tools"><button class="sec" id="presets">Grilles types (blues, pop…)</button><button class="sec" id="exp">Exporter</button><button class="sec" id="impB">Importer</button><button id="shr">Partager</button><input type="file" id="imp" accept=".json,application/json" hidden><span id="msg" class="hint" style="margin:0" aria-live="polite"></span></div>
+<div class="tools"><button class="sec" id="presets">Grilles types (blues, pop…)</button><button class="sec" id="libB">Mes grilles</button><button class="sec" id="exp">Exporter</button><button class="sec" id="impB">Importer</button><button id="shr">Partager</button><input type="file" id="imp" accept=".json,application/json" hidden><span id="msg" class="hint" style="margin:0" aria-live="polite"></span></div>
 <div id="slots" class="chips" aria-label="Grille d'accords"></div>
 <div class="row">
 <label>Niveau<select id="lvl"><option value="full">Complet (7, maj7, m7)</option><option value="easy">Simplifié (accords de base)</option></select></label>
 <label id="capoL">Capo<select id="capo"></select></label>
 <label id="strgL">Cordes<select id="strg"><option value="0">Uniformes</option><option value="1">Épaisseurs réalistes</option></select></label>
 <label>Thème<select id="thm"><option value="auto">Auto</option><option value="light">Clair</option><option value="dark">Sombre</option></select></label>
+<label>Doigts en place<select id="pvt"><option value="0">Masqués</option><option value="1">Affichés</option></select></label>
 
 </div>
 <div id="sugg"><span id="suggT"></span><button id="suggB">Appliquer</button></div>
@@ -116,9 +123,16 @@ button:disabled{opacity:.4;cursor:default}
 <div class="vt" role="group" aria-label="Affichage"><button class="sec" id="zOut" aria-label="Réduire les diagrammes" title="Réduire les diagrammes">−</button><span id="zLab" aria-live="polite">100 %</span><button class="sec" id="zIn" aria-label="Agrandir les diagrammes" title="Agrandir les diagrammes">+</button><button class="sec" id="lockB" aria-pressed="false" aria-label="Verrouiller l'interface (appui long)" title="Appui long pour verrouiller"><svg class="ic-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.8"/></svg><svg class="ic-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button></div></div>
 <div id="vmsg" class="hint" aria-live="polite"></div>
 <div id="grid" aria-live="polite"></div>
-<p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Cliquez sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de votre choix. Une fois les bons diagrammes choisis, maintenez le cadenas appuyé pour verrouiller l'interface. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
+<p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Cliquez sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de votre choix. Une fois les bons diagrammes choisis, maintenez le cadenas appuyé pour verrouiller l'interface. L'option « Doigts en place » colore en jaune les doigts qui ne bougent pas par rapport à l'accord précédent. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
 <p class="hint" id="ver" style="margin-top:4px"></p>
 </main>
+<div id="lsheet"><div class="back" id="lback"></div>
+<div class="sheet" role="dialog" aria-modal="true" aria-labelledby="lT">
+<div class="sh"><strong id="lT">Mes grilles</strong><button id="lok">Fermer</button></div>
+<div class="acts" style="margin-top:0"><input class="lk" id="lname" placeholder="Nom de la grille" maxlength="60" aria-label="Nom de la grille" style="flex:1;min-width:10em"><button id="lsave">Enregistrer la grille actuelle</button></div>
+<div id="llist" style="margin-top:12px;max-height:46vh;overflow-y:auto"></div>
+<p class="hint" id="lmsg" aria-live="polite" style="margin:8px 0 0"></p>
+</div></div>
 <div id="ssheet"><div class="back" id="sback"></div>
 <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sT">
 <div class="sh"><strong id="sT">Partager cette grille</strong><button id="sok">Fermer</button></div>
@@ -169,7 +183,7 @@ function structureToChord(s){
 // ==COMPAT==
 // Versions. APP_VERSION : l'appli (semver ; garder identique à VERSION dans sw.js). SCHEMA_VERSION : format des fichiers d'export
 // et des liens de partage (entier, +1 à chaque changement incompatible ; les ajouts de champs ne le changent pas).
-const APP_VERSION='1.3.2', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
+const APP_VERSION='1.4.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
 // MIGRATIONS[n] transforme un document de format n en format n+1. Ne jamais modifier une migration déjà publiée : en ajouter une.
 const MIGRATIONS={
   1:d=>({...d,schema:2,structure:(Array.isArray(d.chords)?d.chords:[]).map(chordToStructure)})   // v1 : symboles seuls
@@ -285,7 +299,8 @@ function solve(items,NC,TR){
 }
 // Dessin SVG
 const STR_W=[1.54,1.26,0.98,0.73,0.6,0.6]; // épaisseur des 6 cordes, de la plus grave (mi) à la plus aiguë (mi) : 70 % des valeurs de la 1.2.0, sauf les deux plus fines, identiques (0,6)
-function svg(c){
+function svg(c,prev){
+  const pvb=!!(prev&&prev.b&&c.b&&prev.b[0]===c.b[0]&&prev.b[1]===c.b[1]&&prev.b[2]===c.b[2]);   // même barré que l'accord précédent
   const X=i=>16+i*12.1, top=24, fh=15, rows=5;   // écart entre cordes : 12,1 (+10 % par rapport à 11)
   const fr=c.f.filter(x=>x>0), mx=fr.length?Math.max(...fr):0, mn=fr.length?Math.min(...fr):1;
   const start=mx<=5?1:mn;
@@ -296,20 +311,21 @@ function svg(c){
   c.f.forEach((f,i)=>{ if(f<0) s+=`<text x="${X(i)}" y="16" font-size="10" text-anchor="middle" fill="currentColor" stroke="none">×</text>`;
     else if(f==0) s+=`<circle cx="${X(i)}" cy="12" r="3" stroke-width="1.2"/>`;});
   if(c.b){const [bf,a,z]=c.b,x1=X(6-a),x2=X(6-z),y=top+(bf-start+0.5)*fh;
-    s+=`<rect x="${x1-5}" y="${y-5}" width="${x2-x1+10}" height="10" rx="5" fill="var(--accent)" stroke="none"/>`;}
+    s+=`<rect x="${x1-5}" y="${y-5}" width="${x2-x1+10}" height="10" rx="5" fill="${pvb?'var(--pivot)':'var(--accent)'}" ${pvb?'stroke="var(--ink)" stroke-width="1.4"':'stroke="none"'}/>`;}
   c.f.forEach((f,i)=>{ if(f<=0) return;
     const inBar=c.b&&f==c.b[0]&&(6-i)<=c.b[1]&&(6-i)>=c.b[2];
     const y=top+(f-start+0.5)*fh;
-    if(!inBar) s+=`<circle cx="${X(i)}" cy="${y}" r="5.5" fill="var(--accent)" stroke="none"/>`;
-    if(c.g[i]&&!inBar) s+=`<text x="${X(i)}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="var(--accent-ink)" stroke="none">${c.g[i]}</text>`;});
+    const pv=!!(prev&&prev.f[i]===f);   // même corde, même case que l'accord précédent : le doigt reste en place
+    if(!inBar) s+=`<circle cx="${X(i)}" cy="${y}" r="5.5" fill="${pv?'var(--pivot)':'var(--accent)'}" ${pv?'stroke="var(--ink)" stroke-width="1.4"':'stroke="none"'}/>`;
+    if(c.g[i]&&!inBar) s+=`<text x="${X(i)}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="${pv?'var(--pivot-ink)':'var(--accent-ink)'}" stroke="none">${c.g[i]}</text>`;});
   if(c.b){const y=top+(c.b[0]-start+0.5)*fh;
-    s+=`<text x="${X(6-c.b[1])}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="var(--accent-ink)" stroke="none">1</text>`;}
+    s+=`<text x="${X(6-c.b[1])}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="${pvb?'var(--pivot-ink)':'var(--accent-ink)'}" stroke="none">1</text>`;}
   return s+'</svg>';
 }
 // Interface
 const $=id=>document.getElementById(id);
 const capoSel=$('capo'); for(let k=0;k<=7;k++) capoSel.add(new Option(k?`Case ${k}`:'Sans capo',k));
-let ov={}, ovP={}, tab='g', thick=true, locked=false, zoom=1;
+let ov={}, ovP={}, tab='g', thick=true, locked=false, zoom=1, pivots=false;
 let chords=['Am','F','C','G7','Am','F','C','E7'];
 function tokens(){return chords.slice();}
 // Regroupe les accords identiques consécutifs : un seul diagramme par série
@@ -324,11 +340,12 @@ function renderG(){
   const capo=+capoSel.value, lvl=$('lvl').value;
   $('slots').innerHTML=chords.map((c,i)=>`<button class="chip" data-i="${i}">${c}</button>`).join('')+'<button class="chip add" id="add" aria-label="Ajouter un accord">+</button>';
   const m=model(ov), {runs,items,chosen,rov}=m;
+  const prevOf=i=>pivots&&i>0?chosen[i-1]||null:null;
   $('grid').innerHTML=items.map((it,i)=>{
-    const c=chosen[i], rep=runs[i].n>1?`${runs[i].n} mesures`:'';
+    const c=chosen[i], rep=runs[i].n>1?`${runs[i].n} mesures`:'', pt=prevOf(i)?pivotText(c,prevOf(i)):'';
     if(!c) return `<div class="card" style="cursor:default"><b>${it.t}</b><small>${[rep,it.note].filter(Boolean).join(' · ')}</small></div>`;
     const shape=capo?`forme ${it.shape}`:'', n=it.note||(it.full.length>1?`variante ${it.pool.length==1?(rov[i]%it.full.length)+1:c.id+1}/${it.full.length}`:'');
-    return `<div class="card" tabindex="0" role="button" data-i="${i}" aria-label="${it.t} : changer de variante"><b>${it.t}</b>${svg(c)}<small>${[rep,shape,n].filter(Boolean).join(' · ')}</small></div>`;
+    return `<div class="card" tabindex="0" role="button" data-i="${i}" aria-label="${it.t} : changer de variante"><b>${it.t}</b>${svg(c,prevOf(i))}<small>${[rep,shape,n,pt].filter(Boolean).join(' · ')}</small></div>`;
   }).join('');
   // suggestion de capo (calculée sur la suite d'accords sans répétitions consécutives)
   const sg=$('sugg'); sg.style.display='none';
@@ -411,7 +428,7 @@ $('pok').onclick=closeP; $('pback').onclick=closeP;
 $('pcols').onclick=e=>{const b=e.target.closest('.opt'); if(!b) return;
   if(b.dataset.k=='k'){pk=+b.dataset.v;drawP();return;}
   chords=PRE[+b.dataset.v][1].map(x=>mk(pk,x)); ov={};ovP={}; closeP(); render();};
-document.addEventListener('keydown',e=>{if(e.key=='Escape'){closeSheet();closeP();closeS();}});
+document.addEventListener('keydown',e=>{if(e.key=='Escape'){closeSheet();closeP();closeS();closeL();}});
 // ==PIANO==
 const IV={'':[0,4,7],'5':[0,7],'5(2)':[0,7],m:[0,3,7],'7':[0,4,7,10],m7:[0,3,7,10],maj7:[0,4,7,11],sus2:[0,2,7],sus4:[0,5,7]};
 const INV=['position fondamentale','1er renversement','2e renversement','3e renversement'];
@@ -447,28 +464,29 @@ function modelP(ovr){
   const items=buildP(runs.map(r=>r.t),$('lvl').value,rov);
   return {runs,items,rov,...solve(items,nodeCostP,transP)};
 }
-function svgP(c){
+function svgP(c,prev){
   const lo=48,hi=83,kw=10,wh=50,bh=31,bw=6.4, W=[0,2,4,5,7,9,11], rh=new Set(c.n);
-  const fill=(m,d)=>rh.has(m)?'var(--accent)':m==c.bm?'var(--bass)':d;
+  const pv=m=>!!(prev&&rh.has(m)&&prev.n.includes(m)), ring=m=>pv(m)?' stroke="var(--ink)" stroke-width="1.4"':'';   // note déjà jouée par l'accord précédent
+  const fill=(m,d)=>rh.has(m)?(pv(m)?'var(--pivot)':'var(--accent)'):m==c.bm?'var(--bass)':d;
   let s=`<svg viewBox="0 0 ${21*kw} ${wh+2}" role="img" aria-label="clavier" stroke="var(--keyline)" stroke-width=".8">`, wi=0, bl=[];
-  for(let m=lo;m<=hi;m++){ if(W.includes(m%12)){s+=`<rect x="${wi*kw}" y="1" width="${kw}" height="${wh}" fill="${fill(m,'var(--key)')}"/>`; wi++;} else bl.push([m,wi]); }
-  bl.forEach(([m,w])=>{s+=`<rect x="${w*kw-bw/2}" y="1" width="${bw}" height="${bh}" rx="1" fill="${fill(m,'var(--blackkey)')}"/>`;});
+  for(let m=lo;m<=hi;m++){ if(W.includes(m%12)){s+=`<rect x="${wi*kw}" y="1" width="${kw}" height="${wh}" fill="${fill(m,'var(--key)')}"${ring(m)}/>`; wi++;} else bl.push([m,wi]); }
+  bl.forEach(([m,w])=>{s+=`<rect x="${w*kw-bw/2}" y="1" width="${bw}" height="${bh}" rx="1" fill="${fill(m,'var(--blackkey)')}"${ring(m)}/>`;});
   return s+'</svg>';
 }
 function renderP(){
   const {runs,items,chosen}=modelP(ovP);
   $('grid').innerHTML=items.map((it,i)=>{
-    const c=chosen[i], rep=runs[i].n>1?`${runs[i].n} mesures`:'';
+    const c=chosen[i], rep=runs[i].n>1?`${runs[i].n} mesures`:'', pp=pivots&&i>0?chosen[i-1]||null:null, pt=pp?pivotTextP(c,pp):'';
     if(!c) return `<div class="card pn" style="cursor:default"><b>${it.t}</b><small>${[rep,it.note].filter(Boolean).join(' · ')}</small></div>`;
     const nm=m=>N[m%12];
-    return `<div class="card pn" tabindex="0" role="button" data-i="${i}" aria-label="${it.t} : changer de renversement"><b>${it.t}</b>${svgP(c)}<small>${[rep,INV[c.inv]].filter(Boolean).join(' · ')}</small><small>MG ${nm(c.bm)} · MD ${c.n.map(nm).join(' ')}</small></div>`;
+    return `<div class="card pn" tabindex="0" role="button" data-i="${i}" aria-label="${it.t} : changer de renversement"><b>${it.t}</b>${svgP(c,pp)}<small>${[rep,INV[c.inv],pt].filter(Boolean).join(' · ')}</small><small>MG ${nm(c.bm)} · MD ${c.n.map(nm).join(' ')}</small></div>`;
   }).join('');
 }
 // ==/PIANO==
 const slotsHTML=()=>{$('slots').innerHTML=chords.map((c,i)=>`<button class="chip" data-i="${i}">${c}</button>`).join('')+'<button class="chip add" id="add" aria-label="Ajouter un accord">+</button>';};
-function render(){ if(tab=='g') renderG(); else {slotsHTML(); renderP();} applyLockUi(); }
+function render(){ if(tab=='g') renderG(); else {slotsHTML(); renderP();} applyLockUi(); scheduleSave(); }
 const hintG=$('hint').innerHTML;
-const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que vous pouvez jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Cliquez sur un clavier pour changer de renversement. Une fois les bons renversements choisis, maintenez le cadenas appuyé pour verrouiller l'interface. Le capo ne s'applique pas au piano.";
+const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que vous pouvez jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Cliquez sur un clavier pour changer de renversement. Une fois les bons renversements choisis, maintenez le cadenas appuyé pour verrouiller l'interface. L'option « Doigts en place » colore en jaune les notes que l'accord précédent contient déjà. Le capo ne s'applique pas au piano.";
 function setTab(t){
   tab=t; $('tabG').setAttribute('aria-selected',t=='g'); $('tabP').setAttribute('aria-selected',t=='p');
   $('capoL').style.display=$('strgL').style.display=t=='g'?'':'none'; $('sugg').style.display='none';
@@ -557,7 +575,7 @@ function decodeShare(hash){const m=(hash||'').match(/^#s=([\w-]+)$/); if(!m) ret
 function loadFromHash(){
   if(!/^#s=/.test(location.hash)||locked) return;
   const d=decodeShare(location.hash), r=d?applyImport(d):{n:0,warnings:[]};
-  if(r.n){ setTab(d.tab=='p'?'p':'g'); $('msg').textContent='Grille partagée chargée.'+(r.warnings.length?' ⚠ '+r.warnings.join(' '):''); }
+  if(r.n){ setTab(d.tab=='p'?'p':'g'); baseline=JSON.stringify(currentDoc()); $('msg').textContent='Grille partagée chargée.'+(r.warnings.length?' ⚠ '+r.warnings.join(' '):''); }
   else $('msg').textContent='Lien de partage invalide.';
 }
 const closeS=()=>$('ssheet').classList.remove('open');
@@ -581,16 +599,16 @@ $('scopy').onclick=async()=>{
   catch(_){ let ok=false; try{ok=document.execCommand('copy');}catch(__){} $('sfb').textContent=ok?'Lien copié.':'Copie automatique impossible : le lien est sélectionné, copiez-le à la main.'; }
 };
 window.addEventListener('hashchange',loadFromHash);
-loadFromHash();
 // ==THEME==
 // Thème : variables CSS (voir theme.css) + réglages possibles dans l'adresse, utiles pour intégrer l'appli dans un autre projet.
 // Ex. ?theme=dark&accent=ff6600&bg=101418&radius=4&font=Georgia&strings=1
-const COLORS={bg:'--bg',panel:'--panel',ink:'--ink',muted:'--muted',line:'--line',accent:'--accent',accentink:'--accent-ink',warn:'--warn',bass:'--bass',key:'--key',keyline:'--keyline',blackkey:'--blackkey'};
+const COLORS={bg:'--bg',panel:'--panel',ink:'--ink',muted:'--muted',line:'--line',accent:'--accent',accentink:'--accent-ink',warn:'--warn',bass:'--bass',key:'--key',keyline:'--keyline',blackkey:'--blackkey',pivot:'--pivot',pivotink:'--pivot-ink'};
 function parseTheme(search){
   const q=new URLSearchParams(search), out={theme:null,strings:null,vars:{}};
   if(['light','dark','auto'].includes(q.get('theme'))) out.theme=q.get('theme');
   if(['0','1'].includes(q.get('strings'))) out.strings=q.get('strings')==='1';
   const z=parseFloat(q.get('zoom')); if(z>=0.5&&z<=4) out.zoom=z;
+  if(['0','1'].includes(q.get('pivots'))) out.pivots=q.get('pivots')==='1';
   for(const [name,prop] of Object.entries(COLORS)){const v=q.get(name); if(v&&/^#?[0-9a-f]{3,8}$/i.test(v)) out.vars[prop]='#'+v.replace(/^#/,'');}
   const r=q.get('radius'); if(r&&/^\d{1,2}(px|rem)?$/.test(r)) out.vars['--radius']=/\D/.test(r)?r:r+'px';
   [['font','--font-body'],['fonttitle','--font-title']].forEach(([name,prop])=>{const v=q.get(name); if(v&&/^[\w ,'"-]{1,80}$/.test(v)) out.vars[prop]=v;});
@@ -606,9 +624,11 @@ const setMode=t=>{ if(t==='light'||t==='dark') document.documentElement.dataset.
   Object.entries(th.vars).forEach(([k,v])=>document.documentElement.style.setProperty(k,v));
   // Épaisseurs réalistes par défaut : seul un choix explicite « uniformes » (0) les désactive.
   thick=th.strings!==null?th.strings:pref('strings')!=='0'; $('strg').value=thick?'1':'0';
+  pivots=th.pivots!==undefined?th.pivots:pref('pivots')==='1'; $('pvt').value=pivots?'1':'0';
 }
 $('thm').onchange=()=>{setMode($('thm').value); pref('theme',$('thm').value);};
 $('strg').onchange=()=>{thick=$('strg').value==='1'; pref('strings',thick?'1':'0'); render();};
+$('pvt').onchange=()=>{pivots=$('pvt').value==='1'; pref('pivots',pivots?'1':'0'); render();};
 // ==VIEW==
 // Zoom des diagrammes et verrouillage de l'interface (appui long sur le cadenas).
 const ZOOMS=[0.75,1,1.25,1.5,2,2.5,3];
@@ -628,13 +648,13 @@ function applyLockUi(){
   const lb=$('lockB'); lb.setAttribute('aria-pressed',String(locked));
   lb.setAttribute('aria-label',locked?"Déverrouiller l'interface (appui long)":"Verrouiller l'interface (appui long)");
   lb.title=locked?'Appui long pour déverrouiller':'Appui long pour verrouiller';
-  ['presets','impB','lvl','capo'].forEach(id=>{ $(id).disabled=locked; });
+  ['presets','libB','impB','lvl','capo'].forEach(id=>{ $(id).disabled=locked; });
   document.querySelectorAll('#slots button').forEach(b=>{ b.disabled=locked; });
   document.querySelectorAll('#grid .card[data-i]').forEach(c=>c.setAttribute('aria-disabled',String(locked)));
 }
 function toggleLock(){
-  locked=!locked; applyLockUi();
-  if(locked){ closeSheet(); closeP(); $('sugg').style.display='none'; } else render();
+  locked=!locked; applyLockUi(); scheduleSave();
+  if(locked){ closeSheet(); closeP(); closeL(); $('sugg').style.display='none'; } else render();
   vmsg(locked?'Interface verrouillée. Maintenez le cadenas appuyé pour la déverrouiller.':'Interface déverrouillée.');
   try{ navigator.vibrate&&navigator.vibrate(30); }catch(_){}
 }
@@ -650,6 +670,82 @@ function toggleLock(){
 // Pas de menu contextuel du navigateur (appui long) sur les zones interactives ; les champs de saisie gardent le leur.
 document.addEventListener('contextmenu',e=>{ if(e.target.closest&&e.target.closest('#lockB,.vt,.tabs,#grid,#slots,.tools,.sheet')&&!e.target.closest('input,textarea')) e.preventDefault(); });
 // ==/VIEW==
+
+// ==PIVOT==
+// Doigts en place : un doigt reste en place si l'accord suivant utilise la même corde et la même case (guitare),
+// une note reste en place si l'accord précédent la contient déjà (piano).
+function pivotText(c,p){
+  if(!c||!p) return '';
+  const idx=[]; c.f.forEach((f,i)=>{ if(f>0&&p.f[i]===f) idx.push(i); });
+  if(!idx.length) return 'aucun doigt en place';
+  const n=new Set(idx.map(i=>c.g[i]||('s'+i))).size;   // une corde barrée ne compte que pour un doigt
+  return n+(n>1?' doigts en place':' doigt en place');
+}
+function pivotTextP(c,p){
+  if(!c||!p) return '';
+  const n=c.n.filter(m=>p.n.includes(m)).length;
+  return n?n+(n>1?' notes en place':' note en place'):'aucune note en place';
+}
+// ==/PIVOT==
+// ==LIB==
+// Sauvegarde locale : dernière grille (automatique) et « Mes grilles » (nommées). Même format que les fichiers d'export
+// et les liens (migrations comprises), donc relisible par les versions suivantes. Rien ne quitte l'appareil.
+const CUR_KEY='current', LIB_KEY='library';
+let baseline=null, saveTimer=null, armedDel=null;
+const currentDoc=()=>({...buildShare(),locked});
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{ const s=JSON.stringify(currentDoc()); if(s!==baseline) pref(CUR_KEY,s); },300);
+}
+function startup(){
+  if(/^#s=/.test(location.hash)){ loadFromHash(); return; }   // un lien partagé prime, sans écraser la dernière grille tant qu'on n'y touche pas
+  let d=null; try{ d=JSON.parse(pref(CUR_KEY)||'null'); }catch(_){}
+  const r=d?applyImport(d):{n:0,warnings:[]};
+  if(r.n){ locked=!!d.locked; setTab(d.tab==='p'?'p':'g'); $('msg').textContent='Dernière grille rouverte.'+(r.warnings.length?' ⚠ '+r.warnings.join(' '):''); }
+}
+const libRead=()=>{ try{ const a=JSON.parse(pref(LIB_KEY)||'[]'); return Array.isArray(a)?a.filter(e=>e&&typeof e.id==='string'&&typeof e.name==='string'&&e.doc):[]; }catch(_){ return []; } };
+const libWrite=a=>{ try{ localStorage.setItem('accords.'+LIB_KEY,JSON.stringify(a)); return true; }catch(_){ return false; } };
+const closeL=()=>$('lsheet').classList.remove('open');
+function drawLib(){
+  const box=$('llist'), lib=libRead(); box.textContent='';
+  if(!lib.length){ const p=document.createElement('p'); p.className='hint'; p.textContent='Aucune grille enregistrée pour le moment.'; box.appendChild(p); return; }
+  lib.slice().sort((a,b)=>String(b.savedAt).localeCompare(String(a.savedAt))).forEach(e=>{
+    const row=document.createElement('div'); row.className='lrow';
+    const meta=document.createElement('div'); meta.className='lmeta';
+    const b=document.createElement('b'); b.textContent=e.name;
+    const cs=Array.isArray(e.doc.chords)?e.doc.chords:[], dt=new Date(e.savedAt);
+    const s=document.createElement('small'); s.textContent=[cs.length+' accord'+(cs.length>1?'s':''),cs.slice(0,6).join(' ')+(cs.length>6?'…':''),isNaN(dt)?'':dt.toLocaleDateString('fr-FR')].filter(Boolean).join(' · ');
+    meta.append(b,s);
+    const o=document.createElement('button'); o.textContent='Ouvrir'; o.dataset.a='open'; o.dataset.id=e.id;
+    const d=document.createElement('button'); d.className='sec'; d.dataset.a='del'; d.dataset.id=e.id; d.textContent=armedDel===e.id?'Confirmer ?':'Supprimer';
+    row.append(meta,o,d); box.appendChild(row);
+  });
+}
+$('libB').onclick=()=>{ armedDel=null; $('lmsg').textContent=''; drawLib(); $('lsheet').classList.add('open'); $('lname').focus(); };
+$('lok').onclick=closeL; $('lback').onclick=closeL;
+$('lsave').onclick=()=>{
+  const name=($('lname').value.trim()||('Grille du '+new Date().toLocaleDateString('fr-FR'))).slice(0,60);
+  const lib=libRead(), i=lib.findIndex(e=>e.name.toLowerCase()===name.toLowerCase());
+  const entry={id:i>=0?lib[i].id:'g'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,savedAt:new Date().toISOString(),doc:buildExport()};
+  if(i>=0) lib[i]=entry; else lib.push(entry);
+  if(libWrite(lib)){ $('lmsg').textContent=i>=0?`Grille « ${name} » mise à jour.`:`Grille « ${name} » enregistrée.`; $('lname').value=''; armedDel=null; drawLib(); }
+  else $('lmsg').textContent="Enregistrement impossible : l'espace de stockage de cet appareil est plein ou désactivé.";
+};
+$('llist').onclick=e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  const lib=libRead(), ent=lib.find(x=>x.id===b.dataset.id); if(!ent) return;
+  if(b.dataset.a==='open'){
+    const r=applyImport(ent.doc);
+    if(r.n){ setTab(tab); closeL(); $('msg').textContent=`Grille « ${ent.name} » ouverte.`+(r.warnings.length?' ⚠ '+r.warnings.join(' '):''); }
+    else $('lmsg').textContent="Cette grille n'a pas pu être relue.";
+  } else if(armedDel===ent.id){
+    armedDel=null; $('lmsg').textContent=libWrite(lib.filter(x=>x.id!==ent.id))?`Grille « ${ent.name} » supprimée.`:'Suppression impossible.'; drawLib();
+  } else {
+    armedDel=ent.id; drawLib(); setTimeout(()=>{ if(armedDel===ent.id){ armedDel=null; drawLib(); } },3000);
+  }
+};
+// ==/LIB==
+startup();
 $('ver').textContent=`Version ${APP_VERSION} · format de fichier ${SCHEMA_VERSION} · symboles d'accords ${CHORD_LIB_VERSION} · doigtés guitare : ${DB_VERSION}`;
 render();
 </script>

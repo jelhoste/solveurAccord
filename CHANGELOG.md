@@ -3,6 +3,14 @@
 Versionnage : `APP_VERSION` suit le semver (MAJEUR.MINEUR.CORRECTIF) ; `SCHEMA_VERSION` est le numéro entier du format des
 fichiers d'export et des liens de partage (voir FORMAT.md).
 
+## 1.4.0 - 2026-11-02 (format de fichier : 2, inchangé)
+- Mémorisation sur l'appareil : la dernière grille (accords, niveau, capo, choix manuels, onglet, verrou) est enregistrée automatiquement et
+  rouverte au lancement. Un lien partagé prime et n'écrase pas la dernière grille tant qu'on n'y touche pas.
+- « Mes grilles » : enregistrer, rouvrir et supprimer des grilles nommées (même nom = mise à jour ; suppression en deux temps).
+- Option « Doigts en place » (masquée par défaut) : en jaune, les doigts de guitare qui gardent la même corde et la même case que l'accord
+  précédent (un barré compte pour un doigt), les notes de piano déjà jouées par l'accord précédent, avec le décompte sous chaque diagramme.
+  Paramètre d'adresse `pivots=1`, couleurs `pivot` et `pivotink`.
+
 ## 1.3.2 - 2026-11-01 (format de fichier : 2, inchangé)
 - Cordes les plus fines : le mi aigu retrouve son épaisseur d'avant (0,6) et le si est aligné dessus, donc les deux cordes fines ont la même
   épaisseur. Les quatre cordes graves gardent leur réduction de 30 %.

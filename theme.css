@@ -16,6 +16,8 @@
   --accent-ink: #ffffff;  texte posé sur la couleur principale
   --warn: #fff3d6;        encadré de suggestion de capo
   --bass: #d9731f;        basse (main gauche du piano)
+  --pivot: #e0a100;       doigts / notes qui restent en place (option « Doigts en place »)
+  --pivot-ink: #1b242b;   texte posé sur cette couleur
 }
 */
 
