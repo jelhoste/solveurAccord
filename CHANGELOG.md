@@ -3,6 +3,10 @@
 Versionnage : `APP_VERSION` suit le semver (MAJEUR.MINEUR.CORRECTIF) ; `SCHEMA_VERSION` est le numéro entier du format des
 fichiers d'export et des liens de partage (voir FORMAT.md).
 
+## 1.5.0 - 2026-11-02 (format de fichier : 2, inchangé)
+- Option « Chiffres dans les ronds » (guitare) : affiche ou masque les numéros de doigts, « 1 » du barré compris. Affichés par défaut ;
+  réglage mémorisé ; paramètre d'adresse `digits=0` ou `digits=1`. Le numéro de case reste affiché.
+
 ## 1.4.0 - 2026-11-02 (format de fichier : 2, inchangé)
 - Mémorisation sur l'appareil : la dernière grille (accords, niveau, capo, choix manuels, onglet, verrou) est enregistrée automatiquement et
   rouverte au lancement. Un lien partagé prime et n'écrase pas la dernière grille tant qu'on n'y touche pas.

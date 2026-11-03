@@ -41,7 +41,7 @@
 Les sauvegardes locales réutilisent **le même document** (donc les mêmes migrations) :
 - `accords.current` : dernière grille, enregistrée automatiquement. Document des liens de partage (seuls les choix manuels) + `locked` (booléen, verrou).
 - `accords.library` : tableau de `{ id, name, savedAt, doc }` où `doc` est un document d'export complet.
-- Préférences d'affichage (hors document) : `accords.theme`, `accords.strings`, `accords.zoom`, `accords.pivots`.
+- Préférences d'affichage (hors document) : `accords.theme`, `accords.strings`, `accords.zoom`, `accords.pivots`, `accords.digits`.
 Ces données restent sur l'appareil et le navigateur, ne sont pas synchronisées, et un document illisible est ignoré sans bloquer le lancement.
 
 ## Règles de compatibilité

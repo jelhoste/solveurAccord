@@ -113,6 +113,7 @@ button:disabled{opacity:.4;cursor:default}
 <label>Niveau<select id="lvl"><option value="full">Complet (7, maj7, m7)</option><option value="easy">Simplifié (accords de base)</option></select></label>
 <label id="capoL">Capo<select id="capo"></select></label>
 <label id="strgL">Cordes<select id="strg"><option value="0">Uniformes</option><option value="1">Épaisseurs réalistes</option></select></label>
+<label id="digL">Chiffres dans les ronds<select id="dgt"><option value="1">Affichés</option><option value="0">Masqués</option></select></label>
 <label>Thème<select id="thm"><option value="auto">Auto</option><option value="light">Clair</option><option value="dark">Sombre</option></select></label>
 <label>Doigts en place<select id="pvt"><option value="0">Masqués</option><option value="1">Affichés</option></select></label>
 
@@ -183,7 +184,7 @@ function structureToChord(s){
 // ==COMPAT==
 // Versions. APP_VERSION : l'appli (semver ; garder identique à VERSION dans sw.js). SCHEMA_VERSION : format des fichiers d'export
 // et des liens de partage (entier, +1 à chaque changement incompatible ; les ajouts de champs ne le changent pas).
-const APP_VERSION='1.4.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
+const APP_VERSION='1.5.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
 // MIGRATIONS[n] transforme un document de format n en format n+1. Ne jamais modifier une migration déjà publiée : en ajouter une.
 const MIGRATIONS={
   1:d=>({...d,schema:2,structure:(Array.isArray(d.chords)?d.chords:[]).map(chordToStructure)})   // v1 : symboles seuls
@@ -317,15 +318,15 @@ function svg(c,prev){
     const y=top+(f-start+0.5)*fh;
     const pv=!!(prev&&prev.f[i]===f);   // même corde, même case que l'accord précédent : le doigt reste en place
     if(!inBar) s+=`<circle cx="${X(i)}" cy="${y}" r="5.5" fill="${pv?'var(--pivot)':'var(--accent)'}" ${pv?'stroke="var(--ink)" stroke-width="1.4"':'stroke="none"'}/>`;
-    if(c.g[i]&&!inBar) s+=`<text x="${X(i)}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="${pv?'var(--pivot-ink)':'var(--accent-ink)'}" stroke="none">${c.g[i]}</text>`;});
-  if(c.b){const y=top+(c.b[0]-start+0.5)*fh;
+    if(digits&&c.g[i]&&!inBar) s+=`<text x="${X(i)}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="${pv?'var(--pivot-ink)':'var(--accent-ink)'}" stroke="none">${c.g[i]}</text>`;});
+  if(c.b&&digits){const y=top+(c.b[0]-start+0.5)*fh;
     s+=`<text x="${X(6-c.b[1])}" y="${y+3.3}" font-size="9" font-weight="700" text-anchor="middle" fill="${pvb?'var(--pivot-ink)':'var(--accent-ink)'}" stroke="none">1</text>`;}
   return s+'</svg>';
 }
 // Interface
 const $=id=>document.getElementById(id);
 const capoSel=$('capo'); for(let k=0;k<=7;k++) capoSel.add(new Option(k?`Case ${k}`:'Sans capo',k));
-let ov={}, ovP={}, tab='g', thick=true, locked=false, zoom=1, pivots=false;
+let ov={}, ovP={}, tab='g', thick=true, locked=false, zoom=1, pivots=false, digits=true;
 let chords=['Am','F','C','G7','Am','F','C','E7'];
 function tokens(){return chords.slice();}
 // Regroupe les accords identiques consécutifs : un seul diagramme par série
@@ -489,7 +490,7 @@ const hintG=$('hint').innerHTML;
 const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que vous pouvez jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Cliquez sur un clavier pour changer de renversement. Une fois les bons renversements choisis, maintenez le cadenas appuyé pour verrouiller l'interface. L'option « Doigts en place » colore en jaune les notes que l'accord précédent contient déjà. Le capo ne s'applique pas au piano.";
 function setTab(t){
   tab=t; $('tabG').setAttribute('aria-selected',t=='g'); $('tabP').setAttribute('aria-selected',t=='p');
-  $('capoL').style.display=$('strgL').style.display=t=='g'?'':'none'; $('sugg').style.display='none';
+  $('capoL').style.display=$('strgL').style.display=$('digL').style.display=t=='g'?'':'none'; $('sugg').style.display='none';
   $('hint').innerHTML=t=='g'?hintG:hintP; render();
 }
 $('tabG').onclick=()=>setTab('g'); $('tabP').onclick=()=>setTab('p');
@@ -609,6 +610,7 @@ function parseTheme(search){
   if(['0','1'].includes(q.get('strings'))) out.strings=q.get('strings')==='1';
   const z=parseFloat(q.get('zoom')); if(z>=0.5&&z<=4) out.zoom=z;
   if(['0','1'].includes(q.get('pivots'))) out.pivots=q.get('pivots')==='1';
+  if(['0','1'].includes(q.get('digits'))) out.digits=q.get('digits')==='1';
   for(const [name,prop] of Object.entries(COLORS)){const v=q.get(name); if(v&&/^#?[0-9a-f]{3,8}$/i.test(v)) out.vars[prop]='#'+v.replace(/^#/,'');}
   const r=q.get('radius'); if(r&&/^\d{1,2}(px|rem)?$/.test(r)) out.vars['--radius']=/\D/.test(r)?r:r+'px';
   [['font','--font-body'],['fonttitle','--font-title']].forEach(([name,prop])=>{const v=q.get(name); if(v&&/^[\w ,'"-]{1,80}$/.test(v)) out.vars[prop]=v;});
@@ -625,10 +627,12 @@ const setMode=t=>{ if(t==='light'||t==='dark') document.documentElement.dataset.
   // Épaisseurs réalistes par défaut : seul un choix explicite « uniformes » (0) les désactive.
   thick=th.strings!==null?th.strings:pref('strings')!=='0'; $('strg').value=thick?'1':'0';
   pivots=th.pivots!==undefined?th.pivots:pref('pivots')==='1'; $('pvt').value=pivots?'1':'0';
+  digits=th.digits!==undefined?th.digits:pref('digits')!=='0'; $('dgt').value=digits?'1':'0';   // affichés par défaut
 }
 $('thm').onchange=()=>{setMode($('thm').value); pref('theme',$('thm').value);};
 $('strg').onchange=()=>{thick=$('strg').value==='1'; pref('strings',thick?'1':'0'); render();};
 $('pvt').onchange=()=>{pivots=$('pvt').value==='1'; pref('pivots',pivots?'1':'0'); render();};
+$('dgt').onchange=()=>{digits=$('dgt').value==='1'; pref('digits',digits?'1':'0'); render();};
 // ==VIEW==
 // Zoom des diagrammes et verrouillage de l'interface (appui long sur le cadenas).
 const ZOOMS=[0.75,1,1.25,1.5,2,2.5,3];
