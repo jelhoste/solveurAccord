@@ -48,9 +48,25 @@ Si tu déplaces l'appli à une autre adresse, les anciens liens partagés ne mar
    l'export et le partage restent utilisables. Le verrou est mémorisé avec la grille (voir section 9).
  - Boutons − et + : taille des diagrammes, mémorisée sur l'appareil.
 
+10) IMPRESSION
+ - Bouton « Imprimer » (ou Ctrl+P) : ouvre l'impression du navigateur. La feuille contient l'en-tête (titre, grille, instrument, capo, niveau, date)
+   et les diagrammes de l'onglet affiché, en clair, sans les boutons. Pour imprimer le piano après la guitare, changer d'onglet puis réimprimer.
+ - Pour obtenir un PDF : choisir « Enregistrer au format PDF » comme imprimante. Activer « Graphiques d'arrière-plan » n'est pas nécessaire.
+ - Dans une page intégrée (iframe), l'impression peut être refusée par la page parente.
+
 9) MÉMORISATION SUR L'APPAREIL ET « DOIGTS EN PLACE »
  - La dernière grille (avec ses choix, le niveau, le capo, l'onglet et le verrou) est enregistrée automatiquement et rouverte au lancement.
  - « Mes grilles » : enregistrer des grilles nommées. Même nom = mise à jour. Tout reste sur l'appareil et dans le navigateur utilisé :
    pas de synchronisation entre appareils (utiliser « Exporter » ou « Partager » pour passer d'un appareil à l'autre). Vider les données du site efface tout.
  - Un lien partagé a priorité à l'ouverture, sans écraser la dernière grille tant qu'on n'y touche pas.
  - Option « Doigts en place » : colore en jaune ce qui ne bouge pas d'un accord au suivant (même corde et même case en guitare, même note au piano).
+
+11) ÉCOUTE DES ACCORDS
+ - Bouton « haut-parleur » sous chaque diagramme (et dans la fenêtre de choix d'accord) : fait entendre l'accord. Guitare : les cordes appuyées du
+   diagramme, capo compris, en coup de médiator. Piano : la basse puis la main droite. Cela marche aussi quand l'interface est verrouillée.
+ - « Écouter la grille » : joue toute la suite, une mesure de quatre temps par accord, avec le son de l'onglet affiché. Réglages : tempo (50 à 160) et
+   « En boucle », tous deux mémorisés. La lecture s'arrête si on modifie la grille, le capo, le niveau ou un choix de variante, ou si on change d'onglet.
+ - Le son est fabriqué par la page (aucun fichier audio). Il donne la hauteur des notes, pas le timbre d'un vrai instrument.
+ - Le premier son demande un geste (toucher ou clic) : c'est une règle des navigateurs. Sur iPhone et iPad, l'interrupteur de sonnerie (mode silence)
+   coupe aussi ce son ; augmenter le volume du média.
+ - Test sans dépendance de la synthèse : « node tests/synth.test.js ».

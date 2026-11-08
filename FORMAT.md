@@ -48,7 +48,7 @@ Ces données restent sur l'appareil et le navigateur, ne sont pas synchronisées
 1. **Ancien fichier, appli récente** : toujours lu. Chaque changement incompatible s'accompagne d'une migration `MIGRATIONS[n]`
    (document n -> n+1), appliquée en chaîne. Un fichier sans `schema` est traité comme le format 1 (ancien champ `version`).
 2. **Fichier récent, appli ancienne** : lecture au mieux (les champs inconnus sont ignorés) avec un avertissement si le format est plus récent.
-3. **Accords** : la forme `structure` prime sur le symbole ; à défaut, le symbole est relu. Un accord illisible est ignoré et signalé.
+3. **Accords** : la forme `structure` prime sur le symbole ; à défaut, le symbole est relu s'il respecte `SAFE_SYMBOL` (lettres, chiffres, `# b ( ) + -`, 15 caractères au plus après la lettre, une basse facultative). Un accord illisible ou non conforme est ignoré et signalé. Tout texte d'accord est échappé avant d'entrer dans du HTML (`esc`).
 4. **Solutions** : si une solution n'existe plus parmi les candidats actuels (base de doigtés ou règles modifiées), elle est recalculée
    automatiquement et l'utilisateur en est averti.
 5. **Chaque accord de la grille est toujours signalé** si quelque chose ne peut pas être repris : rien n'est perdu silencieusement.

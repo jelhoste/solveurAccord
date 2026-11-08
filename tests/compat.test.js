@@ -4,7 +4,7 @@ const fs=require('fs'), path=require('path'), assert=require('assert');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 const a=html.indexOf('// ==CHORDS=='), b=html.indexOf('// ==/COMPAT==');
 assert(a>0&&b>a,'blocs ==CHORDS== / ==COMPAT== introuvables dans index.html');
-const L=new Function(html.slice(a,b)+'\nreturn {parse,N,QUALITY_ID,chordToStructure,structureToChord,normalizeImport,resolveChords,SCHEMA_VERSION,APP_VERSION};')();
+const L=new Function(html.slice(a,b)+'\nreturn {parse,N,QUALITY_ID,chordToStructure,structureToChord,normalizeImport,resolveChords,SCHEMA_VERSION,APP_VERSION,SAFE_SYMBOL};')();
 const fx=n=>JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures',n),'utf8'));
 let fails=0; const t=(name,f)=>{try{f();console.log('  ok     '+name);}catch(e){fails++;console.log('  ÉCHEC  '+name+'\n         '+e.message);}};
 
@@ -43,6 +43,15 @@ t('la structure prime sur le symbole ; un symbole illisible est rattrapé par la
 });
 t('documents invalides refusés',()=>{
   for(const d of [null,{},{app:'autre',chords:['C']},{app:'diagrammes-accords'},{app:'diagrammes-accords',schema:0,chords:['C']}]) assert(L.normalizeImport(d).error);
+});
+t('tous les symboles pris en charge respectent SAFE_SYMBOL',()=>{
+  for(let r=0;r<12;r++) for(const q of Object.keys(L.QUALITY_ID)){
+    const s=L.N[r]+q; assert(L.SAFE_SYMBOL.test(s),s+' refusé'); const sb=s+'/'+L.N[(r+7)%12]; assert(L.SAFE_SYMBOL.test(sb),sb+' refusé');
+  }
+});
+t('SÉCURITÉ : un symbole contenant du code est ignoré et signalé',()=>{
+  const evil=['C<img src=x onerror=1>','C"onfocus="x','Am;alert(1)','<script>','C&amp;','H7','Cxxxxxxxxxxxxxxxxxxxx'];
+  const r=L.resolveChords({chords:[...evil,'Am'],structure:[]}); assert.deepStrictEqual(r.chords,['Am']); assert.strictEqual(r.bad.length,evil.length);
 });
 console.log(fails?'\n'+fails+' test(s) en échec':'\nTous les tests passent');
 process.exitCode=fails?1:0;

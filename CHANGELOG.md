@@ -3,6 +3,27 @@
 Versionnage : `APP_VERSION` suit le semver (MAJEUR.MINEUR.CORRECTIF) ; `SCHEMA_VERSION` est le numéro entier du format des
 fichiers d'export et des liens de partage (voir FORMAT.md).
 
+## 1.7.0 - 2026-11-08 (format de fichier : 2, inchangé)
+- ÉCOUTE DES ACCORDS. Un bouton « Écouter » sous chaque diagramme (guitare et piano) et dans la fenêtre de choix d'accord fait entendre l'accord
+  tel qu'il est dessiné : guitare = les cordes appuyées, capo compris (la note sonne à capo + case), jouées en coup de médiator du grave à l'aigu ;
+  piano = basse (main gauche) et main droite. Fonctionne aussi interface verrouillée.
+- « Écouter la grille » : joue toute la suite avec le son de l'onglet affiché, une mesure de quatre temps par accord (une frappe par mesure),
+  tempo réglable (50 à 160, mémorisé), option « En boucle » (mémorisée). L'accord et le diagramme en cours sont entourés. La lecture s'arrête si
+  l'on modifie la grille, le capo, le niveau, un choix de variante, ou si l'on change d'onglet ou de page.
+- Moteur sonore (base des futures fonctions d'entraînement) : un seul AudioContext créé au premier geste, planificateur « avec avance » sur l'horloge
+  audio, sons synthétisés par la page sans aucun fichier audio (guitare pincée de type Karplus–Strong, piano par harmoniques).
+  Le son donne la hauteur des notes, pas le timbre d'un vrai instrument.
+- Impression : la barre d'écoute et les boutons « Écouter » sont masqués.
+- Nouveau test sans dépendance : `node tests/synth.test.js` (justesse à 1 centième de ton, niveau, extinction, notes jouées).
+- Préférences locales ajoutées : `accords.bpm`, `accords.loop`.
+
+## 1.6.0 - 2026-11-03 (format de fichier : 2, inchangé)
+- Bouton « Imprimer » : ouvre l'impression du navigateur avec une mise en page dédiée (aussi via Ctrl+P) : en-tête (titre, grille, instrument,
+  capo, niveau, date, légende « en jaune »), diagrammes de l'onglet affiché, toujours en clair, sans les commandes ni la mention technique de variante.
+- SÉCURITÉ : un nom d'accord piégé arrivant par un lien de partage, un fichier importé, la sauvegarde locale ou « Mes grilles » pouvait injecter
+  du HTML dans la page. Les symboles venant de l'extérieur sont maintenant filtrés (`SAFE_SYMBOL`, accord ignoré et signalé sinon) et tout nom
+  d'accord est échappé à l'affichage. Mettre à jour les installations existantes.
+
 ## 1.5.0 - 2026-11-02 (format de fichier : 2, inchangé)
 - Option « Chiffres dans les ronds » (guitare) : affiche ou masque les numéros de doigts, « 1 » du barré compris. Affichés par défaut ;
   réglage mémorisé ; paramètre d'adresse `digits=0` ou `digits=1`. Le numéro de case reste affiché.
