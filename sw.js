@@ -3,7 +3,7 @@
 // (les modifications apparaissent donc à la visite suivante). Changer CACHE force un nettoyage complet.
 // Les gros fichiers (banque de sons, bibliothèque du synthé) ont leur propre cache, lus en priorité SANS être retéléchargés à chaque visite :
 // ils sont récupérés à l'installation, puis restent sur l'appareil.
-const VERSION='1.9.0';   // garder identique à APP_VERSION dans index.html
+const VERSION='1.10.0';   // garder identique à APP_VERSION dans index.html
 const CACHE='accords-'+VERSION;
 const SOUNDS='accords-sons-1';   // à changer SEULEMENT quand un fichier de vendor/ ou de sons/ est remplacé (sinon l'ancien reste servi)
 const ASSETS=['./','./index.html','./theme.css','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];

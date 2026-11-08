@@ -93,3 +93,11 @@ Si tu déplaces l'appli à une autre adresse, les anciens liens partagés ne mar
  - La batterie vient de la banque de sons si elle est prête, sinon d'une batterie synthétisée par la page. Rien de plus à héberger.
  - Ajouter un rythme : une ligne dans `RHYTHMS` (source/diagrammes-accords.html, bloc ==SYNTH==) : [position en temps, instrument, force].
  - Tests : « node tests/synth.test.js » (rythmes, compteur, batterie synthétisée), et dans tests-jsdom/ : audio3.js, train-chromium.js.
+
+14) BASSE, VERROU PAR ACCORD, TACTILE (version 1.10)
+ - Entraînement : bascule « Ligne de basse ». Binaire : fondamentale et quinte ; ternaire : fondamentale – quinte ; shabada : basse qui marche (fondamentale, tierce,
+   quinte, note d'approche vers l'accord suivant). Avec la banque de sons, c'est une basse électrique au doigt ; sinon une basse synthétisée.
+ - Petit cadenas sous chaque diagramme : maintenez-le appuyé (0,6 s) pour verrouiller ce diagramme, puis de nouveau pour le déverrouiller. Un diagramme verrouillé ne change
+   plus au clic et reste identique quand on modifie le reste de la grille. Les verrous sont enregistrés avec la grille (export, lien de partage). Ils sont levés si le diagramme
+   n'existe plus (changement de capo, de niveau ou d'accord) : la page le dit.
+ - Toutes les zones appuyables font au moins 44 × 44 px. Vérification : « node touch-audit.js » dans tests-jsdom/ (Chromium).

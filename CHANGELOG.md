@@ -3,6 +3,20 @@
 Versionnage : `APP_VERSION` suit le semver (MAJEUR.MINEUR.CORRECTIF) ; `SCHEMA_VERSION` est le numéro entier du format des
 fichiers d'export et des liens de partage (voir FORMAT.md).
 
+## 1.10.0 - 2026-11-08 (format de fichier : 2, inchangé ; champ facultatif « verrou » ajouté)
+- LIGNE DE BASSE en mode entraînement : bascule « Ligne de basse » (mémorisée), une basse par rythme : binaire = fondamentale / quinte avec anticipations,
+  ternaire = fondamentale – quinte aux noires, shabada = « walking bass » (fondamentale, tierce, quinte, note d'approche d'un demi-ton vers l'accord suivant),
+  métronome = basse tenue discrète. Elle suit la basse d'un accord à basse (C/G). Banque de sons : basse électrique au doigt (canal 2) ; sons intégrés : basse synthétisée.
+- VERROU PAR ACCORD : un petit cadenas sous chaque diagramme (guitare et piano), à maintenir appuyé 0,6 s (comme le cadenas général). Le diagramme verrouillé ne change plus
+  au clic, reste en place quand on ajoute ou supprime des accords, et est enregistré (export, lien de partage, sauvegarde automatique, champ `verrou`). Si le capo, le niveau
+  ou l'accord change et que ce diagramme n'existe plus, le verrou est levé avec un message. Le cadenas général désactive aussi ces petits cadenas.
+  Changement de comportement : ajouter un accord ne réinitialise plus que les choix NON verrouillés (comme avant), les verrous sont conservés.
+- TACTILE : toute zone appuyable fait au moins 44 × 44 px (menus, boutons, zoom, liens de partage, lien de la base de doigtés) ; les cases à cocher du mode entraînement
+  sont devenues de grandes bascules (« Faire sonner l'accord », « Ligne de basse », avec ✓ en plus de la couleur) ; cases à cocher restantes agrandies (24 px, libellé cliquable).
+- Nouveaux tests : `tests-jsdom/dom15.js` (verrous), `tests-jsdom/touch-audit.js` (Chromium tactile : zones ≥ 44 px, appui long au doigt, largeurs), ajouts à `audio3.js`,
+  `train-chromium.js` et `tests/synth.test.js` (basse).
+- Préférence locale ajoutée : `accords.trBs`.
+
 ## 1.9.0 - 2026-11-08 (format de fichier : 2, inchangé)
 - MODE ENTRAÎNEMENT. Bouton « Entraînement » dans la barre d'écoute : écran plein de l'accord en cours (en grand, avec son diagramme) et de l'accord
   suivant (en aperçu, encadré au dernier temps quand l'accord change), quatre points pour les temps, « Mesure 3 sur 4 · temps 2 ».

@@ -33,6 +33,9 @@
 - `origine` (`"manuel"` ou `"auto"`, ajouté en 1.1.0, sans changement de `schema` car c'est un simple ajout) : indique si le choix vient de
   l'utilisateur ou du calcul automatique. À l'import, les choix `manuel` sont repris tels quels et restent manuels ; les autres sont
   seulement reproduits si le calcul automatique ne retombe pas dessus. Absent = comportement des fichiers plus anciens.
+- `verrou` (`true`, ajouté en 1.10.0, facultatif, sans changement de `schema`) : le diagramme est verrouillé par l'utilisateur (petit cadenas sous le diagramme). À l'import,
+  le verrou n'est repris que si l'entrée est `origine: "manuel"` et que son contenu (`frettes`, ou `main_droite` + `main_gauche`) est bien reproduit ; sinon il est ignoré.
+  Absent ou `false` = non verrouillé. Les appli plus anciennes ignorent ce champ.
 - Ne sont **pas** enregistrés, volontairement : le rang d'une variante (instable : il dépend du classement et de la base de doigtés)
   et la liste des variantes proposées (elle se recalcule et se figerait).
 - `tab`, `appVersion`, `dbVersion`, `exportedAt` : facultatifs. Les liens de partage n'embarquent que les choix manuels.

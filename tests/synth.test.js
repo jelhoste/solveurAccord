@@ -4,7 +4,7 @@ const fs=require('fs'), path=require('path'), assert=require('assert');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 const a=html.indexOf('// ==SYNTH=='), b=html.indexOf('// ==/SYNTH==');
 assert(a>0&&b>a,'bloc ==SYNTH== introuvable dans index.html');
-const S=new Function(html.slice(a,b)+'\nreturn {midiHz,guitarNotes,pianoNotes,renderGuitar,renderPiano,RHYTHMS,DRUMS,changesPerMin,renderDrum};')();
+const S=new Function(html.slice(a,b)+'\nreturn {midiHz,guitarNotes,pianoNotes,renderGuitar,renderPiano,RHYTHMS,DRUMS,changesPerMin,renderDrum,bassLine,bassMidi,renderBass,BASS_LO};')();
 const sr=44100;
 let fails=0; const t=(name,f)=>{try{f();console.log('  ok     '+name);}catch(e){fails++;console.log('  ÉCHEC  '+name+'\n         '+e.message);}};
 // Fréquence estimée : on cherche, au demi-centième de ton près, le maximum du spectre autour de la fréquence attendue.
@@ -97,4 +97,28 @@ t('batterie synthétisée : grosse caisse grave, charleston aigu et bref, ride q
   assert(zc(snare)>zc(kick),'caisse claire plus claire que la grosse caisse');
 });
 t('batterie synthétisée : même sortie à chaque appel (bruit déterministe)',()=>{ const a=S.renderDrum(sr,'snare'), b=S.renderDrum(sr,'snare'); for(let i=0;i<a.length;i++) assert.strictEqual(a[i],b[i]); });
+
+// ---- Ligne de basse ----
+const A=(root,q,bass=null)=>({root,q,bass});
+t('basse : de mi1 à ré#2, la bonne classe de hauteur',()=>{ assert.strictEqual(S.bassMidi(4),28); assert.strictEqual(S.bassMidi(9),33); assert.strictEqual(S.bassMidi(0),36); assert.strictEqual(S.bassMidi(3),39); for(let pc=0;pc<12;pc++){ const m=S.bassMidi(pc); assert(m>=28&&m<=39&&m%12===pc,pc); } });
+t('basse : chaque rythme donne des notes dans la tessiture, dans la mesure (0 à 4 temps), avec durée et force valides',()=>{
+  for(const id of ['click','bin','ter','swing']) for(const q of ['','m','7','m7','maj7','sus2','sus4','5','5(2)']) for(const r of [0,4,9,11]){
+    const l=S.bassLine(id,A(r,q),A((r+5)%12,'')); assert(l.length>=2,id); l.forEach(([p,m,d,f])=>{ assert(p>=0&&p<4,id+' pos '+p); assert(m>=28&&m<=52,id+' note '+m); assert(d>0&&p+d<=4,id+' durée '+d); assert(f>0&&f<=1); }); }
+});
+t('basse binaire : fondamentale sur 1, quinte sur 3, anticipations en croche',()=>{ const l=S.bassLine('bin',A(9,'m'),A(5,'')); assert.deepStrictEqual(l.map(x=>[x[0],x[1]]),[[0,33],[1.5,33],[2,40],[3.5,33]]); });
+t('basse ternaire : fondamentale / quinte aux noires',()=>{ const l=S.bassLine('ter',A(7,'7'),A(0,'')); assert.deepStrictEqual(l.map(x=>x[1]),[S.bassMidi(7),S.bassMidi(7)+7,S.bassMidi(7),S.bassMidi(7)+7]); assert.deepStrictEqual(l.map(x=>x[0]),[0,1,2,3]); });
+t('walking bass (shabada) : fondamentale, tierce, quinte, puis une note à un demi-ton de la prochaine fondamentale',()=>{
+  const am=S.bassLine('swing',A(9,'m'),A(5,'')); assert.deepStrictEqual(am.map(x=>x[1]),[33,36,40,S.bassMidi(5)-1],'La mineur -> Fa : La, Do, Mi, Mi (Fa-1)'); assert.strictEqual(am[3][1],28,'mi1 = juste sous fa1');
+  const c=S.bassLine('swing',A(0,''),A(7,'7')); assert.deepStrictEqual(c.map(x=>x[1]),[36,40,43,S.bassMidi(7)-1]);
+  assert.strictEqual(S.bassLine('swing',A(0,'m'),A(7,''))[1][1],36+3,'tierce mineure'); assert.strictEqual(S.bassLine('swing',A(0,''),A(7,''))[1][1],36+4,'tierce majeure');
+  const ap=S.bassLine('swing',A(4,''),A(5,''))[3][1]; assert.strictEqual(ap%12,6,'Mi -> Fa : le dessous (Mi) est la fondamentale actuelle : on approche par le dessus (Fa dièse)'); assert(ap>=28&&ap<=52);
+  const up=S.bassLine('swing',A(0,''),A(4,''))[3][1]; assert.strictEqual(up%12,5,'vers Mi (la note la plus grave) : le dessous sortirait de la tessiture, on approche par le dessus (Fa)'); assert(up>=28&&up<=52);
+});
+t('walking bass : même accord ensuite -> la sixte ou la septième ; fin de grille sans suivant',()=>{ assert.strictEqual(S.bassLine('swing',A(7,'7'),A(7,'7'))[3][1],S.bassMidi(7)+10); assert.strictEqual(S.bassLine('swing',A(0,''),A(0,''))[3][1],S.bassMidi(0)+9); assert.strictEqual(S.bassLine('swing',A(0,''),null).length,4); });
+t('basse sur accord à basse : la mesure commence par la basse demandée (C/G)',()=>{ const l=S.bassLine('bin',A(0,'',7),A(5,'')); assert.strictEqual(l[0][1],S.bassMidi(7)); assert.strictEqual(l[2][1],S.bassMidi(0)+7,'la quinte reste celle de l\'accord'); });
+t('basse : accord non reconnu -> pas de note ; pas de plantage',()=>{ assert.deepStrictEqual(S.bassLine('bin',null,null),[]); assert.deepStrictEqual(S.bassLine('bin',{root:0,q:null,bass:null},null),[]); });
+t('basse synthétisée : juste à 1 centième de ton, crête 0,9, finit à zéro, grave (fondamentale dominante)',()=>{
+  for(const m of [28,33,40,52]){ const x=S.renderBass(sr,m); let pk=0; for(const v of x) pk=Math.max(pk,Math.abs(v)); assert(Math.abs(pk-0.9)<0.01,m+' crête '+pk); assert(Math.abs(x[x.length-1])<1e-3);
+    const c=pitchCents(x,S.midiHz(m)); assert(Math.abs(c)<=1,m+' : '+c+' centièmes'); }
+});
 console.log(fails?'\n'+fails+' échec(s)':'\nTous les tests passent'); process.exit(fails?1:0);
