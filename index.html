@@ -108,6 +108,28 @@ button:disabled{opacity:.4;cursor:default}
 #listen{margin:12px 0 0}
 #listen select{padding:6px 8px}
 .card.now,.chip.now{box-shadow:0 0 0 3px var(--accent)}
+/* Mode entraînement : plein écran, accord courant en grand, suivant en aperçu */
+#tr{position:fixed;inset:0;display:none;z-index:20;background:var(--bg);color:var(--ink);overflow:auto;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px))}
+#tr.open{display:block}
+.trin{max-width:900px;margin:0 auto}
+.trstage{display:flex;gap:14px;align-items:stretch;margin:8px 0}
+.trcur{flex:2.2;text-align:center;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:10px}
+.trnext{flex:1;text-align:center;border:1px dashed var(--line);border-radius:var(--radius);padding:10px;opacity:.85}
+.trnext.soon{opacity:1;border-style:solid;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent)}
+.trname{font-size:clamp(3rem,16vw,7.5rem);font-weight:700;line-height:1.05;overflow-wrap:anywhere}
+.trname2{font-size:clamp(1.6rem,7vw,3.2rem);font-weight:700;overflow-wrap:anywhere}
+.trdia{margin:6px auto 0;width:min(100%,220px)}
+.trnext .trdia{width:min(100%,110px)}
+.trdia svg{width:100%;height:auto;display:block}
+.trbeats{display:flex;gap:12px;justify-content:center;margin:10px 0}
+.trbeats i{width:22px;height:22px;border-radius:50%;border:2px solid var(--accent);background:transparent}
+.trbeats i.on{background:var(--accent)}
+.trbeats i.one{transform:scale(1.3)}
+.trbpm{display:flex;gap:6px;align-items:center}
+#trBpm{width:5.2em;font:inherit;padding:8px;border-radius:calc(var(--radius)*.8);border:1px solid var(--line);background:var(--bg);color:var(--ink);text-align:center}
+#trBar,#trCpm{text-align:center;margin:4px 0}
+@media (max-width:560px){.trstage{gap:8px}.trcur,.trnext{padding:8px 6px}.trname{font-size:clamp(2.6rem,14vw,4.5rem)}.trdia{width:min(100%,170px)}.trnext .trdia{width:min(100%,100px)}}
+@media (prefers-reduced-motion:no-preference){.trbeats i{transition:background .06s}}
 @media print{
   @page{margin:12mm}
   /* Impression : toujours en clair, sans les commandes, uniquement le titre, la grille et les diagrammes de l'onglet affiché */
@@ -115,7 +137,7 @@ button:disabled{opacity:.4;cursor:default}
   html,body{background:#fff!important;color:#000!important}
   main{max-width:none;padding:0}
   .print-only{display:block}
-  h1,.lead,.panel,.tabs,#listen,.ear,#vmsg,#sugg,#msg,#hint,#ver,#sheet,#psheet,#ssheet,#lsheet{display:none!important}
+  h1,.lead,.panel,.tabs,#listen,#tr,.ear,#vmsg,#sugg,#msg,#hint,#ver,#sheet,#psheet,#ssheet,#lsheet{display:none!important}
   .cw{display:block;break-inside:avoid}
   #grid{margin-top:8px;gap:8px}
   .card{break-inside:avoid;border:1px solid #999;border-radius:6px;background:#fff;color:#000}
@@ -149,7 +171,25 @@ button:disabled{opacity:.4;cursor:default}
 </div>
 <div class="tabs"><div class="tl" role="tablist"><button role="tab" id="tabG" aria-selected="true">Guitare</button><button role="tab" id="tabP" aria-selected="false">Piano</button></div>
 <div class="vt" role="group" aria-label="Affichage"><button class="sec" id="zOut" aria-label="Réduire les diagrammes" title="Réduire les diagrammes">−</button><span id="zLab" aria-live="polite">100 %</span><button class="sec" id="zIn" aria-label="Agrandir les diagrammes" title="Agrandir les diagrammes">+</button><button class="sec" id="lockB" aria-pressed="false" aria-label="Verrouiller l'interface (appui long)" title="Appui long pour verrouiller"><svg class="ic-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.8"/></svg><svg class="ic-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button></div></div>
-<div class="tools" id="listen" role="group" aria-label="Écoute"><button id="playB" aria-pressed="false">Écouter la grille</button><label class="inl">Tempo<select id="bpm"><option>50</option><option>60</option><option>70</option><option selected>80</option><option>90</option><option>100</option><option>110</option><option>120</option><option>140</option><option>160</option></select></label><label class="inl"><input type="checkbox" id="loopB"> En boucle</label><label class="inl">Son<select id="snd"><option value="sf-steel">Banque : guitare acier</option><option value="sf-nylon">Banque : guitare nylon</option><option value="builtin">Intégré (léger)</option></select></label><span id="sndMsg" class="hint" style="margin:0" aria-live="polite"></span></div>
+<div class="tools" id="listen" role="group" aria-label="Écoute"><button id="playB" aria-pressed="false">Écouter la grille</button><label class="inl">Tempo<select id="bpm"><option>50</option><option>60</option><option>70</option><option selected>80</option><option>90</option><option>100</option><option>110</option><option>120</option><option>140</option><option>160</option></select></label><label class="inl"><input type="checkbox" id="loopB"> En boucle</label><label class="inl">Son<select id="snd"><option value="sf-steel">Banque : guitare acier</option><option value="sf-nylon">Banque : guitare nylon</option><option value="builtin">Intégré (léger)</option></select></label><span id="sndMsg" class="hint" style="margin:0" aria-live="polite"></span><button id="trainB" class="sec" aria-haspopup="dialog">Entraînement</button></div>
+<div id="tr" role="dialog" aria-modal="true" aria-labelledby="trT">
+<div class="trin">
+<div class="sh"><strong id="trT">Entraînement</strong><button class="sec" id="trX">Fermer</button></div>
+<div class="trstage">
+<div class="trcur"><small class="hint">Accord en cours</small><div id="trCur" class="trname">–</div><div id="trDia" class="trdia"></div></div>
+<div class="trnext" id="trNext"><small class="hint">Ensuite</small><div id="trNxt" class="trname2">–</div><div id="trNDia" class="trdia"></div></div>
+</div>
+<div id="trBeats" class="trbeats" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<div id="trBar" class="hint"></div>
+<div class="tools" role="group" aria-label="Réglages de l'entraînement">
+<button id="trGo" aria-pressed="false">Démarrer</button>
+<label>Tempo (battements par minute)<span class="trbpm"><button class="sec" id="trM" aria-label="Moins vite">−</button><input type="number" id="trBpm" min="30" max="240" value="80" inputmode="numeric"><button class="sec" id="trP" aria-label="Plus vite">+</button></span></label>
+<label>Rythme<select id="trRy"></select></label>
+<label class="inl"><input type="checkbox" id="trCh"> Faire sonner l'accord</label>
+</div>
+<div id="trCpm" class="hint" aria-live="polite"></div>
+<p class="hint">Réglez le tempo et le rythme, puis appuyez sur « Démarrer » : la grille tourne en boucle, une mesure de quatre temps par accord. L'accord suivant s'encadre au dernier temps pour vous laisser changer à temps. Le changement d'accord par minute se calcule d'après le tempo et la grille.</p>
+</div></div>
 <div id="vmsg" class="hint" aria-live="polite"></div>
 <div id="grid" aria-live="polite"></div>
 <p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Cliquez sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de votre choix. Une fois les bons diagrammes choisis, maintenez le cadenas appuyé pour verrouiller l'interface. L'option « Doigts en place » colore en jaune les doigts qui ne bougent pas par rapport à l'accord précédent. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Le bouton sous chaque diagramme fait entendre l'accord ; « Écouter la grille » joue toute la suite (une mesure de quatre temps par accord) avec le son de l'instrument affiché. Le son vient par défaut d'une petite banque de sons (SoundFont), téléchargée une fois puis gardée sur l'appareil ; sans elle, la page utilise des sons intégrés plus simples (réglage « Son »).<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
@@ -216,7 +256,7 @@ function structureToChord(s){
 // ==COMPAT==
 // Versions. APP_VERSION : l'appli (semver ; garder identique à VERSION dans sw.js). SCHEMA_VERSION : format des fichiers d'export
 // et des liens de partage (entier, +1 à chaque changement incompatible ; les ajouts de champs ne le changent pas).
-const APP_VERSION='1.8.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
+const APP_VERSION='1.9.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
 // MIGRATIONS[n] transforme un document de format n en format n+1. Ne jamais modifier une migration déjà publiée : en ajouter une.
 const MIGRATIONS={
   1:d=>({...d,schema:2,structure:(Array.isArray(d.chords)?d.chords:[]).map(chordToStructure)})   // v1 : symboles seuls
@@ -287,6 +327,42 @@ function renderPiano(sr,midi){
   for(let i=0;i<nl;i++){ y+=0.3*((rnd()*2-1)-y); out[i]+=y*0.25*(1-i/nl); }
   let pk=0; for(let i=0;i<len;i++) pk=Math.max(pk,Math.abs(out[i])); const g=pk?0.9/pk:0; for(let i=0;i<len;i++) out[i]*=g;
   const fade=Math.round(sr*0.08); for(let n=0;n<fade;n++) out[len-1-n]*=n/fade;
+  return out;
+}
+// ---- Batterie et rythmes (mode entraînement) ----
+// DRUMS : instrument -> [touche GM du canal 9 (kit « Standard »), vélocité mini, vélocité maxi] (la force 0..1 d'un coup s'y projette ; charleston et ride sont poussés plus fort, la banque les rend discrets).
+const DRUM_VOL=127;   // volume du canal de batterie (la banque rend charleston et ride discrets)
+const DRUMS={kick:[36,40,84],snare:[38,40,84],hat:[42,85,127],hatp:[44,95,127],ride:[51,90,127],clickHi:[76,100,127],clickLo:[77,90,120]};
+// Un rythme = une mesure de 4 temps : coups [position en temps (0 inclus à 4 exclu), instrument, force]. Les positions fractionnaires donnent le ternaire (1/3, 2/3).
+const RHYTHMS=(()=>{
+  const mk=(id,name,fn)=>{ const h=[]; fn((p,d,v)=>h.push([p,d,v])); h.sort((a,b)=>a[0]-b[0]); return {id,name,hits:h}; };
+  return [
+    mk('click','Métronome (clic seul)',a=>{ for(let b=0;b<4;b++) a(b,b?'clickLo':'clickHi',b?0.8:1); }),
+    mk('bin','Binaire : poum, ti, tati',a=>{ for(let b=0;b<4;b++){ a(b,'hat',0.75); a(b+0.5,'hat',0.5); a(b,b%2?'snare':'kick',b%2?0.9:0.95); } }),
+    mk('ter','Ternaire : trois coups de charleston par temps',a=>{ for(let b=0;b<4;b++){ a(b,'hat',0.8); a(b+1/3,'hat',0.45); a(b+2/3,'hat',0.6); a(b,b%2?'snare':'kick',b%2?0.9:0.95); } }),
+    mk('swing','Shabada : swing de jazz (cymbale ride)',a=>{ for(let b=0;b<4;b++){ a(b,'ride',0.8); if(b%2){ a(b,'hatp',0.8); a(b+2/3,'ride',0.55); } else a(b,'kick',0.4); } })
+  ];
+})();
+// Changements d'accord par minute quand la grille tourne en boucle (le retour de la dernière mesure à la première compte) ; une mesure = 4 temps.
+function changesPerMin(chords,bpm){ const n=chords.length; if(n<2) return 0; let c=0; for(let i=0;i<n;i++) if(chords[i]!==chords[(i+n-1)%n]) c++; return c*bpm/(4*n); }
+// Batterie synthétisée (pour les sons intégrés, sans banque) : un tableau de nombres par instrument, comme la guitare et le piano.
+function renderDrum(sr,kind){
+  const dur={kick:0.45,snare:0.28,hat:0.09,hatp:0.07,ride:1.1,clickHi:0.05,clickLo:0.05}[kind]; if(!dur) return new Float32Array(0);
+  const len=Math.round(sr*dur), out=new Float32Array(len), rnd=prng(kind.charCodeAt(0)*7919+kind.length), TAU=2*Math.PI;
+  const MET=[205.3,284.3,366.7,427.4,572.8,771.2];   // fréquences « métalliques » du charleston
+  let ph=0, pn=0;
+  for(let i=0;i<len;i++){
+    const t=i/sr, n=rnd()*2-1, dn=n-pn; pn=n; let y=0;
+    if(kind==='kick'){ ph+=TAU*(48+110*Math.exp(-t/0.025))/sr; y=Math.sin(ph)*Math.exp(-t/0.11)+(t<0.004?n*0.3*(1-t/0.004):0); }
+    else if(kind==='snare') y=0.5*Math.sin(TAU*190*t)*Math.exp(-t/0.045)+0.35*dn*Math.exp(-t/0.06);
+    else if(kind==='hat'||kind==='hatp'){ let m=0; for(const f of MET) m+=Math.sin(TAU*f*t)>=0?1:-1; y=(0.35*dn+0.5*m/6)*Math.exp(-t/(kind==='hat'?0.018:0.012))*(kind==='hat'?1:0.7); }
+    else if(kind==='ride'){ [[630,.5,.55],[1370,.4,.45],[2210,.4,.4],[3170,.35,.35],[4380,.3,.3],[5920,.25,.25],[7600,.2,.2]].forEach(([f,a,tau])=>{ y+=a*Math.sin(TAU*f*t)*Math.exp(-t/tau); }); y+=0.25*dn*Math.exp(-t/0.12); }
+    else y=Math.sin(TAU*(kind==='clickHi'?1900:1250)*t)*Math.exp(-t/0.008);
+    out[i]=y;
+  }
+  if(kind==='hat'||kind==='hatp'||kind==='ride'){ for(let i=len-1;i>0;i--) out[i]-=out[i-1]; }   // un coup de passe-haut : pas de grave dans les cymbales
+  let pk=0; for(let i=0;i<len;i++) pk=Math.max(pk,Math.abs(out[i])); const g=pk?0.9/pk:0; for(let i=0;i<len;i++) out[i]*=g;
+  const fade=Math.round(sr*0.005); for(let i=0;i<fade&&i<len;i++) out[len-1-i]*=i/fade;
   return out;
 }
 // ==/SYNTH==
@@ -788,7 +864,7 @@ const Snd={
   // Le synthé (SpessaSynth, dans vendor/) tourne dans un AudioWorklet ; les notes lui sont envoyées avec leur heure (horloge audio),
   // reculée du retard du synthé (≈ 80 ms, mesuré à partir des messages de l'horloge qu'il envoie). Ses « note off » ne sont postés qu'à
   // l'échéance : un événement daté déjà posté ne peut plus être retiré. Sans les fichiers (artefact, page ouverte à plat), les sons intégrés prennent le relais.
-  sfState:'idle', sf:null, sfData:null, sfp:null, sfBusy:false, warmed:false, lag:0.08, lags:[], offs:[], offTimer:null,
+  drumGo:false, drumWarm:false, wantDrums:false, sfState:'idle', sf:null, sfData:null, sfp:null, sfBusy:false, warmed:false, lag:0.08, lags:[], offs:[], offTimer:null,
   sfOn(){ return this.sfState==='ready'&&sndSel.value!=='builtin'; },
   sfFetch(){   // télécharge (ou relit dans le cache du service worker) la banque, le processeur du worklet et la bibliothèque : aucun geste requis
     if(this.sfp) return this.sfp;
@@ -821,7 +897,7 @@ const Snd={
         this.lags.push(c.currentTime-t); if(this.lags.length>16) this.lags.shift(); this.lag=Math.min(0.5,Math.max(0,Math.min(...this.lags))); }); if(port.start) port.start(); }
       await synth.soundBankManager.addSoundBank(this.sfData.bank.slice(0),'main'); await synth.isReady;
       if(synth.setSystemParameter) synth.setSystemParameter('voiceCap',128);
-      this.sf=synth; this.sfProgram(); this.sfState='ready'; setSndMsg('Banque de sons prête.'); this.sfWarm();
+      this.sf=synth; this.sfProgram(); this.sfState='ready'; setSndMsg('Banque de sons prête.'); this.sfWarm(); if(this.wantDrums) this.sfWarmDrums();
     }catch(e){ this.sfState='failed'; this.sf=null; setSndMsg('Banque de sons indisponible : sons intégrés.'); }
     this.sfBusy=false;
   },
@@ -840,6 +916,30 @@ const Snd={
       for(let n=0;n<2&&i<jobs.length;n++){ const j=jobs[i++]; if(j.p!==undefined) s.programChange(ch,j.p); else { s.noteOn(ch,j.k,j.v); s.noteOff(ch,j.k); } }
       setTimeout(step,60); };
     step();
+  },
+  // Batterie (canal 9, kit « Standard » de la banque) : mêmes précautions que pour les notes ; préchauffage silencieux (volume du canal à 0) à l'ouverture de l'entraînement.
+  sfWarmDrums(){
+    const s=this.sf; if(!s||this.drumWarm) return; this.drumWarm=true; this.drumGo=false;
+    const jobs=[]; Object.values(DRUMS).forEach(([k,lo,hi])=>[lo,hi].forEach(v=>jobs.push([k,v])));
+    s.controllerChange(9,7,0); let i=0;
+    const step=()=>{ if(this.sf!==s||this.drumGo) return; if(i>=jobs.length){ s.controllerChange(9,7,DRUM_VOL); this.drumGo=true; return; }
+      for(let n=0;n<2&&i<jobs.length;n++){ const [k,v]=jobs[i++]; s.noteOn(9,k,v); s.noteOff(9,k); } setTimeout(step,60); };
+    step();
+  },
+  drumsReady(){ this.drumGo=true; if(this.sf&&this.drumWarm) this.sf.controllerChange(9,7,DRUM_VOL); },   // au départ : le canal reprend son volume même si le préchauffage n'est pas fini
+  dbuf(kind){ const k='d'+kind; let b=this.cache.get(k); if(!b){ const c=this.ctx, d=renderDrum(c.sampleRate,kind); b=c.createBuffer(1,d.length,c.sampleRate); b.getChannelData(0).set(d); this.cache.set(k,b); } return b; },
+  drum(kind,when,force){
+    const def=DRUMS[kind]; if(!def||!this.ctx) return;
+    if(this.sfOn()){
+      const v=Math.round(def[1]+(def[2]-def[1])*Math.max(0,Math.min(1,force)));
+      this.sf.noteOn(9,def[0],v,{time:when-this.lag}); this.offs.push({time:when+0.4,t0:when,ch:9,key:def[0]});
+      if(!this.offTimer) this.offTimer=setInterval(()=>this.sfPump(),30);
+    } else {
+      const c=this.ctx, src=c.createBufferSource(), g=c.createGain(), v={src,g,t0:when,rel:false,drum:true};
+      src.buffer=this.dbuf(kind); g.gain.value=0.55*force; src.connect(g); g.connect(this.drumOut);
+      src.onended=()=>{ const i=this.voices.indexOf(v); if(i>=0) this.voices.splice(i,1); try{ g.disconnect(); }catch(_){} };
+      this.voices.push(v); src.start(when);
+    }
   },
   chordSF(kind,notes,when){
     const s=this.sf, ch=kind==='piano'?1:0, hold=kind==='piano'?4.5:3.5;
@@ -868,7 +968,8 @@ const Snd={
       const c=this.ctx, lp=c.createBiquadFilter(), comp=c.createDynamicsCompressor(), g=c.createGain();
       lp.type='lowpass'; lp.frequency.value=7000; comp.threshold.value=-3; comp.knee.value=6; comp.ratio.value=10; g.gain.value=0.9;   // le compresseur n'est qu'un limiteur de sécurité : les accords ont une crête d'environ 0,7 avant lui
       lp.connect(comp); comp.connect(g); g.connect(c.destination); this.out=lp; this.comp=comp;
-      this.sfGain=c.createGain(); this.sfGain.gain.value=SF_GAIN; this.sfGain.connect(comp);   // la banque de sons arrive directement (pas de filtre à 7 kHz : cymbales et charleston)
+      this.sfGain=c.createGain(); this.sfGain.gain.value=SF_GAIN; this.sfGain.connect(comp);
+      this.drumOut=c.createGain(); this.drumOut.gain.value=1; this.drumOut.connect(comp);   // batterie intégrée : sans le filtre à 7 kHz (charleston, ride)   // la banque de sons arrive directement (pas de filtre à 7 kHz : cymbales et charleston)
     }
     if(this.ctx.state!=='running'){ try{ this.ctx.resume(); }catch(_){} }
     if(this.sfState==='fetched') this.sfStart();   // la banque est téléchargée : on construit le synthé maintenant que le geste a eu lieu
@@ -897,8 +998,8 @@ const Snd={
   },
   release(when,tc=0.04){   // éteint les notes déjà lancées avant « when » (changement d'accord)
     const c=this.ctx, t=Math.max(when,c.currentTime);
-    this.voices.forEach(v=>{ if(v.rel||v.t0>=when) return; v.rel=true; try{ v.g.gain.setTargetAtTime(0,t,tc); v.src.stop(t+tc*8); }catch(_){} });
-    this.offs.forEach(o=>{ if(o.t0<when&&o.time>when) o.time=when; });   // banque de sons : les extinctions en attente sont avancées à l'instant du changement d'accord
+    this.voices.forEach(v=>{ if(v.rel||v.t0>=when||v.drum) return; v.rel=true; try{ v.g.gain.setTargetAtTime(0,t,tc); v.src.stop(t+tc*8); }catch(_){} });
+    this.offs.forEach(o=>{ if(o.ch!==9&&o.t0<when&&o.time>when) o.time=when; });   // banque de sons : les extinctions en attente sont avancées à l'instant du changement d'accord
   },
   silence(){
     const c=this.ctx; if(!c) return; const t=c.currentTime;
@@ -987,7 +1088,76 @@ sndSel.onchange=()=>{
   else { if(Snd.sfState==='failed'){ Snd.sfp=null; Snd.sfState='idle'; } Snd.sfFetch(); }
 };
 if(sndSel.value!=='builtin') Snd.sfFetch();   // dès l'ouverture : depuis le cache du service worker, c'est immédiat
-document.addEventListener('visibilitychange',()=>{ if(document.hidden&&listening) stopListen(); });   // en arrière-plan, les minuteurs sont ralentis : le tempo ne tiendrait plus
+// --- Mode entraînement : métronome ou boîte à rythme, accord courant en grand, suivant en aperçu, compteur de changements par minute ---
+const trEl=$('tr'), trBpm=$('trBpm'), trRy=$('trRy'), trCh=$('trCh'), trGo=$('trGo'), trDots=[...$('trBeats').children];
+let training=false, trWait=false, trWake=null, trShown='';
+RHYTHMS.forEach(r=>{ const o=document.createElement('option'); o.value=r.id; o.textContent=r.name; trRy.appendChild(o); });
+const trTempo=()=>Math.min(240,Math.max(30,Math.round(+trBpm.value)||80));
+const frNum=v=>(Math.round(v*10)/10).toString().replace('.',',');
+function trCpm(){
+  const n=chords.length, v=changesPerMin(chords,trTempo());
+  $('trCpm').textContent=n<2?'Il faut au moins deux accords dans la grille pour compter des changements.':`À ${trTempo()} battements par minute : environ ${frNum(v)} changement${v>=2?'s':''} d'accord par minute.`;
+}
+function trDia(el,k){   // diagramme de la série k (même dessin que dans la grille), vide si la page n'en propose pas
+  const m=tab==='g'?model(ov):modelP(ovP), c=m.chosen[k];
+  el.innerHTML=c?(tab==='g'?svg(c,null):svgP(c,null)):'';
+}
+function trShow(bar,beat){
+  const n=chords.length; if(!n) return;
+  const nx=(bar+1)%n, key=[tab,bar,JSON.stringify(ov),JSON.stringify(ovP),capoSel.value].join('|');
+  if(key!==trShown){ trShown=key;
+    $('trCur').textContent=chords[bar]; $('trNxt').textContent=chords[nx];
+    trDia($('trDia'),runOf(bar)); trDia($('trNDia'),runOf(nx)); }
+  trDots.forEach((d,i)=>{ d.classList.toggle('on',i<=beat); d.classList.toggle('one',i===0); });
+  $('trNext').classList.toggle('soon',beat===3&&chords[nx]!==chords[bar]);
+  $('trBar').textContent=beat<0?'':`Mesure ${bar+1} sur ${n} · temps ${beat+1}`;
+}
+function trSetRunning(on){
+  training=on; trGo.textContent=on?'Arrêter':'Démarrer'; trGo.setAttribute('aria-pressed',String(on));
+  try{
+    if(on&&navigator.wakeLock&&!trWake) navigator.wakeLock.request('screen').then(w=>{ trWake=w; if(!training) { w.release(); trWake=null; } },()=>{});   // l'écran reste allumé pendant l'entraînement
+    if(!on&&trWake){ trWake.release(); trWake=null; }
+  }catch(_){}
+  if(!on){ trShown=''; trShow(0,-1); }
+}
+function trStop(){ Snd.stop(); trSetRunning(false); }
+function trCancelWait(){ trWait=false; trGo.textContent='Démarrer'; $('trBar').textContent=''; }
+async function trStart(){
+  if(!chords.length){ $('trBar').textContent="Ajoutez d'abord des accords à la grille."; return; }
+  if(listening) stopListen();
+  if(!Snd.ready()){ $('trBar').textContent=NOSOUND; return; }
+  const loading=()=>sndSel.value!=='builtin'&&['fetching','fetched','building'].includes(Snd.sfState);
+  if(loading()){   // la batterie de la banque n'est pas encore prête : on attend (au plus 6 s) pour ne pas mélanger deux timbres
+    trWait=true; trGo.textContent='Annuler'; $('trBar').textContent='Préparation des sons…'; const t0=Date.now();
+    while(trWait&&loading()&&Date.now()-t0<6000) await new Promise(r=>setTimeout(r,40));
+    if(!trWait) return; trCancelWait();
+  }
+  const m=tab==='g'?model(ov):modelP(ovP), kind=kindNow(), n=chords.length;
+  const bars=chords.map((_,i)=>({notes:notesOf(m.chosen[runOf(i)])}));
+  trSetRunning(true);
+  const ok=Snd.sequence(()=>60/trTempo(),n*4,(s,when)=>{
+    const beat=s%4, bar=(s-beat)/4, d=60/trTempo(), rh=RHYTHMS.find(r=>r.id===trRy.value)||RHYTHMS[1];   // rythme et tempo se règlent en cours de route
+    rh.hits.forEach(([p,dr,f])=>{ if(p>=beat-1e-9&&p<beat+1-1e-9) Snd.drum(dr,when+(p-beat)*d,f); });
+    if(beat===0&&trCh.checked){ Snd.release(when,0.05); const b=bars[bar]; if(b.notes.length) Snd.chord(kind,b.notes,when); }
+  },{loop:true,onUi:s=>trShow((s-s%4)/4,s%4),onEnd:()=>trSetRunning(false)});
+  if(ok) Snd.drumsReady(); else { trSetRunning(false); $('trBar').textContent=NOSOUND; }
+}
+function trOpen(){
+  if(listening) stopListen(); Snd.stop();
+  trEl.classList.add('open'); trShown=''; trShow(0,-1); trCpm();
+  Snd.wantDrums=true; Snd.ready();   // l'ouverture est un geste : le synthé de la banque se construit tout de suite et préchauffe la batterie dès qu'il est prêt
+  if(Snd.sf&&Snd.sfOn()) Snd.sfWarmDrums();
+  trGo.focus();
+}
+function trClose(){ if(trWait) trCancelWait(); if(training) trStop(); trEl.classList.remove('open'); Snd.wantDrums=false; $('trainB').focus(); }
+$('trainB').onclick=trOpen; $('trX').onclick=trClose; trGo.onclick=()=>{ if(training) trStop(); else if(trWait) trCancelWait(); else trStart(); };
+const trSetTempo=v=>{ trBpm.value=Math.min(240,Math.max(30,Math.round(v)||80)); pref('trBpm',trBpm.value); trCpm(); };
+$('trM').onclick=()=>trSetTempo(trTempo()-5); $('trP').onclick=()=>trSetTempo(trTempo()+5);
+trBpm.onchange=()=>trSetTempo(+trBpm.value); trBpm.oninput=trCpm;
+trRy.onchange=()=>pref('trRy',trRy.value); trCh.onchange=()=>pref('trCh',trCh.checked?'1':'0');
+{ const b=+pref('trBpm'); if(b>=30&&b<=240) trBpm.value=Math.round(b); const r=pref('trRy'); if(r&&RHYTHMS.some(x=>x.id===r)) trRy.value=r; else trRy.value='bin'; trCh.checked=pref('trCh')==='1'; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&trEl.classList.contains('open')) trClose(); });
+document.addEventListener('visibilitychange',()=>{ if(document.hidden&&listening) stopListen(); if(document.hidden&&training) trStop(); });   // en arrière-plan, les minuteurs sont ralentis : le tempo ne tiendrait plus
 // ==/AUDIO==
 // ==LIB==
 // Sauvegarde locale : dernière grille (automatique) et « Mes grilles » (nommées). Même format que les fichiers d'export

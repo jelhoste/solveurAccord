@@ -4,7 +4,7 @@ const fs=require('fs'), path=require('path'), assert=require('assert');
 const html=fs.readFileSync(path.join(__dirname,'..','index.html'),'utf8');
 const a=html.indexOf('// ==SYNTH=='), b=html.indexOf('// ==/SYNTH==');
 assert(a>0&&b>a,'bloc ==SYNTH== introuvable dans index.html');
-const S=new Function(html.slice(a,b)+'\nreturn {midiHz,guitarNotes,pianoNotes,renderGuitar,renderPiano};')();
+const S=new Function(html.slice(a,b)+'\nreturn {midiHz,guitarNotes,pianoNotes,renderGuitar,renderPiano,RHYTHMS,DRUMS,changesPerMin,renderDrum};')();
 const sr=44100;
 let fails=0; const t=(name,f)=>{try{f();console.log('  ok     '+name);}catch(e){fails++;console.log('  ÉCHEC  '+name+'\n         '+e.message);}};
 // Fréquence estimée : on cherche, au demi-centième de ton près, le maximum du spectre autour de la fréquence attendue.
@@ -54,4 +54,47 @@ t('notes de guitare : cordes à vide, barré, muettes, capo',()=>{
   assert.deepStrictEqual(S.guitarNotes([0,0,0,0,0,0],0),[40,45,50,55,59,64],'cordes à vide');
 });
 t('notes de piano : la basse d\'abord, puis la main droite',()=>{ assert.deepStrictEqual(S.pianoNotes({bm:48,n:[64,67,72]}),[48,64,67,72]); });
+
+// ---- Mode entraînement : rythmes, compteur de changements, batterie synthétisée ----
+const R=id=>S.RHYTHMS.find(r=>r.id===id), cnt=(r,d,b)=>r.hits.filter(h=>h[1]===d&&(b===undefined||Math.floor(h[0]+1e-9)===b)).length;
+t('rythmes : quatre, chacun avec des coups bien formés (position dans [0,4[, instrument connu, force dans ]0,1])',()=>{
+  assert.deepStrictEqual(S.RHYTHMS.map(r=>r.id),['click','bin','ter','swing']);
+  for(const r of S.RHYTHMS){ assert(r.name&&r.hits.length>0,r.id); r.hits.forEach(([p,d,f],i)=>{ assert(p>=0&&p<4,r.id+' position '+p); assert(S.DRUMS[d],r.id+' instrument '+d); assert(f>0&&f<=1,r.id+' force '+f); if(i) assert(p>=r.hits[i-1][0],'trié'); }); }
+});
+t('métronome : un clic par temps, accent sur le un',()=>{ const r=R('click'); assert.strictEqual(r.hits.length,4); assert.strictEqual(r.hits[0][1],'clickHi'); assert(r.hits.slice(1).every(h=>h[1]==='clickLo')); assert.deepStrictEqual(r.hits.map(h=>h[0]),[0,1,2,3]); });
+t('binaire « poum, ti, tati » : grosse caisse sur 1 et 3, caisse claire sur 2 et 4, charleston en croches (8 coups)',()=>{
+  const r=R('bin'); assert.deepStrictEqual(r.hits.filter(h=>h[1]==='kick').map(h=>h[0]),[0,2]); assert.deepStrictEqual(r.hits.filter(h=>h[1]==='snare').map(h=>h[0]),[1,3]); assert.strictEqual(cnt(r,'hat'),8);
+  assert.deepStrictEqual(r.hits.filter(h=>h[1]==='hat').map(h=>h[0]),[0,0.5,1,1.5,2,2.5,3,3.5]);
+});
+t('ternaire : trois coups de charleston par temps (12 par mesure, à 0, 1/3, 2/3), même grosse caisse et caisse claire',()=>{
+  const r=R('ter'); for(let b=0;b<4;b++) assert.strictEqual(cnt(r,'hat',b),3,'temps '+(b+1));
+  const h=r.hits.filter(x=>x[1]==='hat').map(x=>x[0]); [0,1,2,3].forEach(b=>{ assert(Math.abs(h[b*3]-b)<1e-12&&Math.abs(h[b*3+1]-(b+1/3))<1e-12&&Math.abs(h[b*3+2]-(b+2/3))<1e-12); });
+  assert.deepStrictEqual(r.hits.filter(x=>x[1]==='kick').map(x=>x[0]),[0,2]); assert.deepStrictEqual(r.hits.filter(x=>x[1]==='snare').map(x=>x[0]),[1,3]);
+});
+t('shabada (swing de ride) : ride à chaque temps + note « a » aux 2/3 des temps 2 et 4, charleston au pied sur 2 et 4',()=>{
+  const r=R('swing'); assert.strictEqual(cnt(r,'ride'),6);
+  assert.deepStrictEqual(r.hits.filter(h=>h[1]==='ride').map(h=>+h[0].toFixed(4)),[0,1,1.6667,2,3,3.6667]);
+  assert.deepStrictEqual(r.hits.filter(h=>h[1]==='hatp').map(h=>h[0]),[1,3]);
+  const ride=r.hits.filter(h=>h[1]==='ride'); assert(ride.filter(h=>h[0]%1>0).every(h=>h[2]<ride[0][2]),'les notes « a » sont plus douces que les temps');
+});
+t('compteur de changements par minute : grille en boucle, retour de la fin au début compris',()=>{
+  const c=S.changesPerMin; assert.strictEqual(c(['Am','F','C','G7'],80),20); assert.strictEqual(c(['Am','Am','F','F'],80),10);   // 2 changements sur 4 mesures
+  assert.strictEqual(c(['Am','F'],120),30); assert.strictEqual(c(['Am','Am','Am'],100),0); assert.strictEqual(c(['Am'],100),0); assert.strictEqual(c([],100),0);
+  assert.strictEqual(c(['Am','F','C','G7'],160),40); assert.strictEqual(c(['C','G','Am','F','C'],60),Math.round(4*60/(4*5)*1000)/1000+0, 'C…C : le dernier C et le premier C sont identiques : 4 changements sur 5 mesures');
+});
+t('batterie synthétisée : un son non vide, sans dépassement, qui finit à zéro, pour chaque instrument ; clic plus aigu que clic grave',()=>{
+  for(const k of Object.keys(S.DRUMS)){ const d=S.renderDrum(sr,k); assert(d.length>0,k); let pk=0,bad=false; for(const v of d){ if(!Number.isFinite(v)) bad=true; pk=Math.max(pk,Math.abs(v)); } assert(!bad,k+' NaN'); assert(pk>0.8&&pk<=0.91,k+' crête '+pk); assert(Math.abs(d[d.length-1])<1e-3,k+' fin'); }
+  assert.strictEqual(S.renderDrum(sr,'inconnu').length,0);
+  const zc=a=>{ let n=0; for(let i=1;i<a.length;i++) if((a[i]>=0)!==(a[i-1]>=0)) n++; return n/a.length*sr/2; };
+  assert(zc(S.renderDrum(sr,'clickHi'))>zc(S.renderDrum(sr,'clickLo'))+300,'hauteurs des clics');
+});
+t('batterie synthétisée : grosse caisse grave, charleston aigu et bref, ride qui dure',()=>{
+  const e=(a,from,to)=>{ let s=0; for(let i=Math.round(from*sr);i<Math.min(a.length,Math.round(to*sr));i++) s+=a[i]*a[i]; return s; };
+  const kick=S.renderDrum(sr,'kick'), hat=S.renderDrum(sr,'hat'), ride=S.renderDrum(sr,'ride'), snare=S.renderDrum(sr,'snare');
+  const zc=a=>{ let n=0; for(let i=1;i<a.length;i++) if((a[i]>=0)!==(a[i-1]>=0)) n++; return n/a.length*sr/2; };
+  assert(zc(kick.subarray(0,Math.round(0.15*sr)))<400,'grosse caisse grave'); assert(zc(hat)>3000,'charleston aigu '+zc(hat));
+  assert(e(hat,0.05,0.09)<0.02*e(hat,0,0.05),'charleston bref'); assert(e(ride,0.4,0.8)>0.02*e(ride,0,0.4),'le ride se prolonge');
+  assert(zc(snare)>zc(kick),'caisse claire plus claire que la grosse caisse');
+});
+t('batterie synthétisée : même sortie à chaque appel (bruit déterministe)',()=>{ const a=S.renderDrum(sr,'snare'), b=S.renderDrum(sr,'snare'); for(let i=0;i<a.length;i++) assert.strictEqual(a[i],b[i]); });
 console.log(fails?'\n'+fails+' échec(s)':'\nTous les tests passent'); process.exit(fails?1:0);

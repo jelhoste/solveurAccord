@@ -3,6 +3,21 @@
 Versionnage : `APP_VERSION` suit le semver (MAJEUR.MINEUR.CORRECTIF) ; `SCHEMA_VERSION` est le numéro entier du format des
 fichiers d'export et des liens de partage (voir FORMAT.md).
 
+## 1.9.0 - 2026-11-08 (format de fichier : 2, inchangé)
+- MODE ENTRAÎNEMENT. Bouton « Entraînement » dans la barre d'écoute : écran plein de l'accord en cours (en grand, avec son diagramme) et de l'accord
+  suivant (en aperçu, encadré au dernier temps quand l'accord change), quatre points pour les temps, « Mesure 3 sur 4 · temps 2 ».
+  La grille tourne en boucle, une mesure de quatre temps par accord. Réglages : tempo (30 à 240, boutons − / +), rythme, « Faire sonner l'accord » ;
+  tempo et rythme se changent en cours de route. Compteur : « environ N changements d'accord par minute » (selon le tempo et la grille, retour de la
+  dernière mesure à la première compris). L'écran reste allumé pendant l'entraînement (quand le navigateur le permet) ; Échap ferme.
+- Rythmes (batterie) : « Métronome (clic seul) » ; « Binaire : poum, ti, tati » (grosse caisse 1 et 3, caisse claire 2 et 4, charleston en croches) ;
+  « Ternaire : trois coups de charleston par temps » ; « Shabada : swing de jazz » (ride à chaque temps + note aux 2/3 des temps 2 et 4, charleston au pied
+  sur 2 et 4, grosse caisse très douce). Les rythmes sont des données (`RHYTHMS`) : en ajouter un = une ligne.
+- Batterie : avec la banque de sons, canal 9 (kit « Standard » : touches 36, 38, 42, 44, 51, 76, 77), préchauffée en silence à l'ouverture de l'écran,
+  volume du canal 127 ; sans banque (sons intégrés, artefact), batterie synthétisée par la page (`renderDrum`). Le départ attend la banque (6 s au plus)
+  pour ne pas mélanger deux timbres.
+- Nouveaux tests : `tests-jsdom/audio3.js` (faux synthé), `tests-jsdom/train-chromium.js` (vrai Chromium : niveaux, régularité, arrêt), et ajouts à `tests/synth.test.js`.
+- Préférences locales ajoutées : `accords.trBpm`, `accords.trRy`, `accords.trCh`.
+
 ## 1.8.0 - 2026-11-08 (format de fichier : 2, inchangé)
 - BANQUE DE SONS PAR DÉFAUT. Le réglage « Son » (barre d'écoute) propose : « Banque : guitare acier » (défaut), « Banque : guitare nylon » et
   « Intégré (léger) » (les sons synthétisés de la 1.7.0). La banque est une SoundFont GeneralUser GS (sons/note-all.sf3, 2,7 Mo) jouée par SpessaSynth
