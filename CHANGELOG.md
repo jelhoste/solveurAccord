@@ -3,6 +3,17 @@
 Versionnage : `APP_VERSION` suit le semver (MAJEUR.MINEUR.CORRECTIF) ; `SCHEMA_VERSION` est le numéro entier du format des
 fichiers d'export et des liens de partage (voir FORMAT.md).
 
+## 1.8.0 - 2026-11-08 (format de fichier : 2, inchangé)
+- BANQUE DE SONS PAR DÉFAUT. Le réglage « Son » (barre d'écoute) propose : « Banque : guitare acier » (défaut), « Banque : guitare nylon » et
+  « Intégré (léger) » (les sons synthétisés de la 1.7.0). La banque est une SoundFont GeneralUser GS (sons/note-all.sf3, 2,7 Mo) jouée par SpessaSynth
+  (vendor/, licence Apache-2.0). Guitare = canal 0, piano = canal 1 (canal 9 réservé à la batterie du mode entraînement).
+- Mise en cache automatique : le service worker garde la banque et le synthé dans un cache à part (`accords-sons-1`), rempli à la première visite EN LIGNE,
+  puis servi sans réseau et jamais retéléchargés lors d'une mise à jour de l'appli. La page demande aussi au navigateur de rendre le stockage durable.
+- Repli : si les fichiers sont absents, refusés ou invalides (ex. artefact claude.ai), la page l'indique et joue avec les sons intégrés, sans erreur.
+- Réglage temporel : le retard propre du synthé (60 à 100 ms) est mesuré et retranché, pour que les accords tombent sur le temps.
+- Nouveaux tests : `tests-jsdom/audio2.js` (logique, faux synthé) et `tests-jsdom/sf-chromium.js` (vrai Chromium : cache, hors ligne, justesse du rythme).
+- Préférence locale ajoutée : `accords.sound`.
+
 ## 1.7.0 - 2026-11-08 (format de fichier : 2, inchangé)
 - ÉCOUTE DES ACCORDS. Un bouton « Écouter » sous chaque diagramme (guitare et piano) et dans la fenêtre de choix d'accord fait entendre l'accord
   tel qu'il est dessiné : guitare = les cordes appuyées, capo compris (la note sonne à capo + case), jouées en coup de médiator du grave à l'aigu ;

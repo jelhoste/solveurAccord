@@ -21,3 +21,11 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+----------------------------------------------------------------------
+
+SpessaSynth (synthétiseur SoundFont, https://github.com/spessasus/SpessaSynth), copyright Spessasus, licence Apache-2.0.
+Fichiers : vendor/spessa-lib.js et vendor/spessasynth_processor.min.js (texte de la licence : vendor/LICENSE-spessasynth.txt).
+
+GeneralUser GS (banque de sons, S. Christian Collins), fichier sons/note-all.sf3 : utilisation libre, redistribution et modification autorisées dans
+un logiciel (texte : sons/LICENSE-GeneralUser-GS.txt). L'auteur précise ne pas pouvoir garantir à 100 % l'origine de chaque échantillon.

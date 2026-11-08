@@ -149,10 +149,10 @@ button:disabled{opacity:.4;cursor:default}
 </div>
 <div class="tabs"><div class="tl" role="tablist"><button role="tab" id="tabG" aria-selected="true">Guitare</button><button role="tab" id="tabP" aria-selected="false">Piano</button></div>
 <div class="vt" role="group" aria-label="Affichage"><button class="sec" id="zOut" aria-label="Réduire les diagrammes" title="Réduire les diagrammes">−</button><span id="zLab" aria-live="polite">100 %</span><button class="sec" id="zIn" aria-label="Agrandir les diagrammes" title="Agrandir les diagrammes">+</button><button class="sec" id="lockB" aria-pressed="false" aria-label="Verrouiller l'interface (appui long)" title="Appui long pour verrouiller"><svg class="ic-open" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.8"/></svg><svg class="ic-closed" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button></div></div>
-<div class="tools" id="listen" role="group" aria-label="Écoute"><button id="playB" aria-pressed="false">Écouter la grille</button><label class="inl">Tempo<select id="bpm"><option>50</option><option>60</option><option>70</option><option selected>80</option><option>90</option><option>100</option><option>110</option><option>120</option><option>140</option><option>160</option></select></label><label class="inl"><input type="checkbox" id="loopB"> En boucle</label></div>
+<div class="tools" id="listen" role="group" aria-label="Écoute"><button id="playB" aria-pressed="false">Écouter la grille</button><label class="inl">Tempo<select id="bpm"><option>50</option><option>60</option><option>70</option><option selected>80</option><option>90</option><option>100</option><option>110</option><option>120</option><option>140</option><option>160</option></select></label><label class="inl"><input type="checkbox" id="loopB"> En boucle</label><label class="inl">Son<select id="snd"><option value="sf-steel">Banque : guitare acier</option><option value="sf-nylon">Banque : guitare nylon</option><option value="builtin">Intégré (léger)</option></select></label><span id="sndMsg" class="hint" style="margin:0" aria-live="polite"></span></div>
 <div id="vmsg" class="hint" aria-live="polite"></div>
 <div id="grid" aria-live="polite"></div>
-<p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Cliquez sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de votre choix. Une fois les bons diagrammes choisis, maintenez le cadenas appuyé pour verrouiller l'interface. L'option « Doigts en place » colore en jaune les doigts qui ne bougent pas par rapport à l'accord précédent. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Le bouton sous chaque diagramme fait entendre l'accord ; « Écouter la grille » joue toute la suite (une mesure de quatre temps par accord) avec le son de l'instrument affiché. Le son est synthétisé par la page : il donne la hauteur des notes, pas le timbre d'un vrai instrument.<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
+<p class="hint" id="hint">Les accords identiques qui se suivent ne sont affichés qu'une fois (ex. « 4 mesures »). Cliquez sur un diagramme pour passer à une autre variante : le reste de la grille se recalcule autour de votre choix. Une fois les bons diagrammes choisis, maintenez le cadenas appuyé pour verrouiller l'interface. L'option « Doigts en place » colore en jaune les doigts qui ne bougent pas par rapport à l'accord précédent. Avec un capo, les diagrammes se lisent à partir du capo (case 0). Pour une basse différente de la fondamentale (ex. C/G), la page utilise un diagramme d'inversion quand la base en contient un, sinon la forme sans inversion.<br>Le bouton sous chaque diagramme fait entendre l'accord ; « Écouter la grille » joue toute la suite (une mesure de quatre temps par accord) avec le son de l'instrument affiché. Le son vient par défaut d'une petite banque de sons (SoundFont), téléchargée une fois puis gardée sur l'appareil ; sans elle, la page utilise des sons intégrés plus simples (réglage « Son »).<br>Doigtés : base de données <a href="https://github.com/tombatossals/chords-db" rel="noopener" style="color:inherit">chords-db</a> © 2016 David Rubert, licence MIT (complétée par quelques formes ajoutées à la main).</p>
 <p class="hint" id="ver" style="margin-top:4px"></p>
 </main>
 <div id="lsheet"><div class="back" id="lback"></div>
@@ -216,7 +216,7 @@ function structureToChord(s){
 // ==COMPAT==
 // Versions. APP_VERSION : l'appli (semver ; garder identique à VERSION dans sw.js). SCHEMA_VERSION : format des fichiers d'export
 // et des liens de partage (entier, +1 à chaque changement incompatible ; les ajouts de champs ne le changent pas).
-const APP_VERSION='1.7.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
+const APP_VERSION='1.8.0', SCHEMA_VERSION=2, DB_VERSION='chords-db 0.5.1';
 // MIGRATIONS[n] transforme un document de format n en format n+1. Ne jamais modifier une migration déjà publiée : en ajouter une.
 const MIGRATIONS={
   1:d=>({...d,schema:2,structure:(Array.isArray(d.chords)?d.chords:[]).map(chordToStructure)})   // v1 : symboles seuls
@@ -569,7 +569,7 @@ function renderP(){
 const slotsHTML=()=>{$('slots').innerHTML=chords.map((c,i)=>`<button class="chip" data-i="${i}">${esc(c)}</button>`).join('')+'<button class="chip add" id="add" aria-label="Ajouter un accord">+</button>';};
 function render(){ if(tab=='g') renderG(); else {slotsHTML(); renderP();} applyLockUi(); scheduleSave(); listenCheck(); }
 const hintG=$('hint').innerHTML;
-const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que vous pouvez jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Cliquez sur un clavier pour changer de renversement. Une fois les bons renversements choisis, maintenez le cadenas appuyé pour verrouiller l'interface. L'option « Doigts en place » colore en jaune les notes que l'accord précédent contient déjà. Le capo ne s'applique pas au piano. Le bouton sous chaque clavier fait entendre l'accord ; « Écouter la grille » joue toute la suite (une mesure de quatre temps par accord). Le son est synthétisé par la page : il donne la hauteur des notes, pas le timbre d'un vrai piano.";
+const hintP="Piano : la main droite (couleur principale) joue l'accord en choisissant le renversement qui bouge le moins d'un accord à l'autre ; la main gauche (orange) joue la basse, que vous pouvez jouer une ou deux octaves plus bas. Les accords identiques qui se suivent ne sont affichés qu'une fois. Cliquez sur un clavier pour changer de renversement. Une fois les bons renversements choisis, maintenez le cadenas appuyé pour verrouiller l'interface. L'option « Doigts en place » colore en jaune les notes que l'accord précédent contient déjà. Le capo ne s'applique pas au piano. Le bouton sous chaque clavier fait entendre l'accord ; « Écouter la grille » joue toute la suite (une mesure de quatre temps par accord). Le son vient par défaut d'une petite banque de sons (SoundFont), téléchargée une fois puis gardée sur l'appareil ; sans elle, la page utilise des sons intégrés plus simples (réglage « Son »).";
 function setTab(t){
   tab=t; $('tabG').setAttribute('aria-selected',t=='g'); $('tabP').setAttribute('aria-selected',t=='p');
   $('capoL').style.display=$('strgL').style.display=$('digL').style.display=t=='g'?'':'none'; $('sugg').style.display='none';
@@ -780,17 +780,98 @@ function pivotTextP(c,p){
 const EAR_SVG='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
 const earBtn=(i,t)=>`<button class="ear" data-i="${i}" aria-label="Écouter ${esc(t)}" title="Écouter cet accord">${EAR_SVG}</button>`;
 const NOSOUND="Le son n'est pas disponible dans ce navigateur.";
+const SF_FILES={lib:'vendor/spessa-lib.js',processor:'vendor/spessasynth_processor.min.js',bank:'sons/note-all.sf3'};   // à côté de la page
+const SF_GAIN=2;   // niveau de la banque de sons avant le limiteur (réglé par mesure, à valider à l'oreille)
 const Snd={
   ctx:null, out:null, cache:new Map(), voices:[], seq:null, timer:null,
+  // ---- Banque de sons (SoundFont) : moteur par défaut quand les fichiers sont présents à côté de la page (PWA hébergée) ----
+  // Le synthé (SpessaSynth, dans vendor/) tourne dans un AudioWorklet ; les notes lui sont envoyées avec leur heure (horloge audio),
+  // reculée du retard du synthé (≈ 80 ms, mesuré à partir des messages de l'horloge qu'il envoie). Ses « note off » ne sont postés qu'à
+  // l'échéance : un événement daté déjà posté ne peut plus être retiré. Sans les fichiers (artefact, page ouverte à plat), les sons intégrés prennent le relais.
+  sfState:'idle', sf:null, sfData:null, sfp:null, sfBusy:false, warmed:false, lag:0.08, lags:[], offs:[], offTimer:null,
+  sfOn(){ return this.sfState==='ready'&&sndSel.value!=='builtin'; },
+  sfFetch(){   // télécharge (ou relit dans le cache du service worker) la banque, le processeur du worklet et la bibliothèque : aucun geste requis
+    if(this.sfp) return this.sfp;
+    this.sfState='fetching'; setSndMsg('Banque de sons : chargement…');
+    const get=async(url,text)=>{ const r=await fetch(url); if(!r.ok) throw new Error(url+' : HTTP '+r.status); return text?r.text():r.arrayBuffer(); };
+    this.sfp=(async()=>{
+      const [bank,proc]=await Promise.all([get(SF_FILES.bank),get(SF_FILES.processor,true)]);
+      const b=new Uint8Array(bank,0,12), tag=(i,t)=>[...t].every((ch,k)=>b[i+k]===ch.charCodeAt(0));
+      if(b.length<12||!tag(0,'RIFF')||!tag(8,'sfbk')) throw new Error('banque de sons invalide');
+      if(!(window.SpessaLib&&window.SpessaLib.WorkletSynthesizer)) await new Promise((ok,ko)=>{ const sc=document.createElement('script'); sc.src=SF_FILES.lib; sc.onload=ok; sc.onerror=()=>ko(new Error('bibliothèque introuvable')); document.head.appendChild(sc); });
+      if(!(window.SpessaLib&&window.SpessaLib.WorkletSynthesizer)) throw new Error('bibliothèque invalide');
+      this.sfData={bank,proc}; this.sfState='fetched';
+      try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(_){}   // demande de garder les fichiers sur l'appareil
+      if(this.ctx) this.sfStart();
+    })().catch(()=>{ this.sfState='failed'; setSndMsg('Banque de sons indisponible ici : sons intégrés.'); });
+    return this.sfp;
+  },
+  async sfStart(){   // construit le synthé (après un geste : il faut un AudioContext)
+    if(this.sfState!=='fetched'||this.sfBusy||!this.ctx) return;
+    this.sfBusy=true; this.sfState='building'; setSndMsg('Banque de sons : préparation…');
+    try{
+      const c=this.ctx, code=this.sfData.proc, urls=[]; let ok=false, last=null;
+      try{ urls.push(URL.createObjectURL(new Blob([code],{type:'text/javascript'}))); }catch(_){}
+      urls.push('data:text/javascript;charset=utf-8,'+encodeURIComponent(code));   // repli : certaines pages refusent les adresses blob:
+      for(const u of urls){ try{ await c.audioWorklet.addModule(u); ok=true; break; }catch(e){ last=e; } }
+      if(!ok) throw last||new Error('worklet');
+      const synth=new window.SpessaLib.WorkletSynthesizer(c); synth.connect(this.sfGain);
+      const port=synth.worklet&&synth.worklet.port;
+      if(port){ port.addEventListener('message',ev=>{ const t=ev&&ev.data&&ev.data.currentTime; if(!Number.isFinite(t)) return;
+        this.lags.push(c.currentTime-t); if(this.lags.length>16) this.lags.shift(); this.lag=Math.min(0.5,Math.max(0,Math.min(...this.lags))); }); if(port.start) port.start(); }
+      await synth.soundBankManager.addSoundBank(this.sfData.bank.slice(0),'main'); await synth.isReady;
+      if(synth.setSystemParameter) synth.setSystemParameter('voiceCap',128);
+      this.sf=synth; this.sfProgram(); this.sfState='ready'; setSndMsg('Banque de sons prête.'); this.sfWarm();
+    }catch(e){ this.sfState='failed'; this.sf=null; setSndMsg('Banque de sons indisponible : sons intégrés.'); }
+    this.sfBusy=false;
+  },
+  sfProgram(){   // canal 0 : guitare (acier 25 ou nylon 24), canal 1 : piano (0)
+    const s=this.sf; if(!s) return;
+    [[0,sndSel.value==='sf-nylon'?24:25],[1,0]].forEach(([ch,p])=>{ s.controllerChange(ch,0,0); s.controllerChange(ch,32,0); s.programChange(ch,p); });
+  },
+  // Un SF3 décompresse chaque échantillon à la première note qui l'utilise, dans le fil audio : on joue donc une fois, en silence (canal 15, volume 0),
+  // des notes de tout l'ambitus avec les vélocités utilisées, pour que la première vraie écoute ne saccade pas.
+  sfWarm(){
+    if(this.warmed||!this.sf) return; this.warmed=true;
+    const s=this.sf, ch=15, jobs=[];
+    [[sndSel.value==='sf-nylon'?24:25,40,86,[92,100]],[0,48,83,[88,100]]].forEach(([p,a,b,vs])=>{ jobs.push({p}); for(let k=a;k<=b;k+=2) vs.forEach(v=>jobs.push({k,v})); });
+    s.controllerChange(ch,7,0); s.controllerChange(ch,0,0); s.controllerChange(ch,32,0);
+    let i=0; const step=()=>{ if(this.sf!==s||i>=jobs.length) return;
+      for(let n=0;n<2&&i<jobs.length;n++){ const j=jobs[i++]; if(j.p!==undefined) s.programChange(ch,j.p); else { s.noteOn(ch,j.k,j.v); s.noteOff(ch,j.k); } }
+      setTimeout(step,60); };
+    step();
+  },
+  chordSF(kind,notes,when){
+    const s=this.sf, ch=kind==='piano'?1:0, hold=kind==='piano'?4.5:3.5;
+    notes.forEach((m,i)=>{
+      const t=when+(kind==='piano'?i*0.006:i*0.024), vel=kind==='piano'?(i===0?100:88):Math.round(96+4*Math.sin(i*2.1));
+      this.offs.forEach(o=>{ if(o.ch===ch&&o.key===m&&o.time>t-0.004) o.time=Math.max(o.t0,t-0.004); });   // même touche encore tenue : on la relâche juste avant de la rejouer
+      s.noteOn(ch,m,vel,{time:t-this.lag});
+      this.offs.push({time:t+hold,t0:t,ch,key:m});
+    });
+    if(!this.offTimer) this.offTimer=setInterval(()=>this.sfPump(),30);
+  },
+  sfPump(){   // poste les « note off » arrivés à échéance (dans les 120 ms)
+    const c=this.ctx, s=this.sf;
+    if(c&&s){ const hz=c.currentTime+0.12, keep=[]; this.offs.forEach(o=>{ if(o.time<hz) s.noteOff(o.ch,o.key,{time:o.time-this.lag}); else keep.push(o); }); this.offs=keep; }
+    else this.offs=[];
+    if(!this.offs.length){ clearInterval(this.offTimer); this.offTimer=null; }
+  },
+  sfSilence(){
+    const s=this.sf; if(!s) return; this.offs=[]; s.stopAll(true);
+    [40,120,300].forEach(ms=>setTimeout(()=>{ if(this.sf===s&&!this.offs.length) s.stopAll(true); },ms));   // une note postée juste avant la coupure peut arriver après : on recoupe
+  },
   ready(){   // à appeler depuis un geste (clic, toucher)
     if(!this.ctx){
       const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return false;
       try{ this.ctx=new AC(); }catch(_){ this.ctx=null; return false; }
       const c=this.ctx, lp=c.createBiquadFilter(), comp=c.createDynamicsCompressor(), g=c.createGain();
       lp.type='lowpass'; lp.frequency.value=7000; comp.threshold.value=-3; comp.knee.value=6; comp.ratio.value=10; g.gain.value=0.9;   // le compresseur n'est qu'un limiteur de sécurité : les accords ont une crête d'environ 0,7 avant lui
-      lp.connect(comp); comp.connect(g); g.connect(c.destination); this.out=lp;
+      lp.connect(comp); comp.connect(g); g.connect(c.destination); this.out=lp; this.comp=comp;
+      this.sfGain=c.createGain(); this.sfGain.gain.value=SF_GAIN; this.sfGain.connect(comp);   // la banque de sons arrive directement (pas de filtre à 7 kHz : cymbales et charleston)
     }
     if(this.ctx.state!=='running'){ try{ this.ctx.resume(); }catch(_){} }
+    if(this.sfState==='fetched') this.sfStart();   // la banque est téléchargée : on construit le synthé maintenant que le geste a eu lieu
     return true;
   },
   buffer(kind,midi){
@@ -810,16 +891,19 @@ const Snd={
   },
   // Un accord : guitare = coup de médiator vers le bas (du grave à l'aigu, 24 ms entre cordes) ; piano = notes presque ensemble, basse en premier.
   chord(kind,notes,when){
+    if(this.sfOn()) return this.chordSF(kind,notes,when);
     if(kind==='piano') notes.forEach((m,i)=>this.note('piano',m,when+i*0.006,i===0?0.47:0.37));
     else notes.forEach((m,i)=>this.note('guitar',m,when+i*0.024,0.5*(0.92+0.08*Math.sin(i*2.1))));
   },
   release(when,tc=0.04){   // éteint les notes déjà lancées avant « when » (changement d'accord)
     const c=this.ctx, t=Math.max(when,c.currentTime);
     this.voices.forEach(v=>{ if(v.rel||v.t0>=when) return; v.rel=true; try{ v.g.gain.setTargetAtTime(0,t,tc); v.src.stop(t+tc*8); }catch(_){} });
+    this.offs.forEach(o=>{ if(o.t0<when&&o.time>when) o.time=when; });   // banque de sons : les extinctions en attente sont avancées à l'instant du changement d'accord
   },
   silence(){
     const c=this.ctx; if(!c) return; const t=c.currentTime;
     this.voices.forEach(v=>{ v.rel=true; try{ v.g.gain.cancelScheduledValues(t); v.g.gain.setTargetAtTime(0,t,0.03); v.src.stop(t+0.25); }catch(_){} });
+    this.sfSilence();
   },
   halt(){   // arrête le planificateur, sans couper les notes qui sonnent encore
     clearInterval(this.timer); this.timer=null;
@@ -828,7 +912,7 @@ const Snd={
   stop(){ this.halt(); this.silence(); },
   hear(kind,notes){   // un accord isolé
     if(!this.ready()) return false;
-    this.stop(); notes.forEach(m=>this.buffer(kind,m));   // notes préparées avant de lire l'horloge
+    this.stop(); if(!this.sfOn()) notes.forEach(m=>this.buffer(kind,m));   // sons intégrés : notes préparées avant de lire l'horloge
     this.chord(kind,notes,this.ctx.currentTime+0.03); return true;
   },
   // Suite de n pas (des temps) : onStep(k,when) est appelé un peu avant chaque pas, avec son heure sur l'horloge audio.
@@ -852,7 +936,8 @@ const Snd={
   }
 };
 // --- Interface d'écoute ---
-const playB=$('playB'), bpmSel=$('bpm'), loopB=$('loopB');
+const playB=$('playB'), bpmSel=$('bpm'), loopB=$('loopB'), sndSel=$('snd'), sndMsg=$('sndMsg');
+const setSndMsg=t=>{ sndMsg.textContent=t; };
 let listening=false, listenSig='', nowI=-1, nowK=-1;
 const sigNow=()=>[tab,chords.join(),capoSel.value,$('lvl').value,JSON.stringify(ov),JSON.stringify(ovP)].join('|');
 function runOf(i){ let k=-1, prev=null; for(let j=0;j<=i;j++){ if(chords[j]!==prev){ k++; prev=chords[j]; } } return k; }   // numéro de la série (diagramme) qui contient la mesure i
@@ -893,6 +978,15 @@ playB.onclick=()=>{ if(listening) stopListen(); else startListen(); };
 $('hear').onclick=()=>hearRun(runOf(cur));
 bpmSel.onchange=()=>pref('bpm',bpmSel.value); loopB.onchange=()=>pref('loop',loopB.checked?'1':'0');
 { const b=pref('bpm'); if(b&&[...bpmSel.options].some(o=>o.value===b)) bpmSel.value=b; loopB.checked=pref('loop')==='1'; }
+// Son : la banque de sons est le choix par défaut (guitare acier) ; « Intégré » = synthèse de la page, sans fichier. Réglage mémorisé.
+{ const v=pref('sound'); if(v&&[...sndSel.options].some(o=>o.value===v)) sndSel.value=v; }
+sndSel.onchange=()=>{
+  pref('sound',sndSel.value);
+  if(sndSel.value==='builtin'){ setSndMsg(''); return; }
+  if(Snd.sfState==='ready'){ Snd.sfProgram(); Snd.warmed=false; Snd.sfWarm(); setSndMsg('Banque de sons prête.'); }
+  else { if(Snd.sfState==='failed'){ Snd.sfp=null; Snd.sfState='idle'; } Snd.sfFetch(); }
+};
+if(sndSel.value!=='builtin') Snd.sfFetch();   // dès l'ouverture : depuis le cache du service worker, c'est immédiat
 document.addEventListener('visibilitychange',()=>{ if(document.hidden&&listening) stopListen(); });   // en arrière-plan, les minuteurs sont ralentis : le tempo ne tiendrait plus
 // ==/AUDIO==
 // ==LIB==
